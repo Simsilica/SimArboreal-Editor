@@ -40,8 +40,6 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.ScreenshotAppState;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -70,9 +68,6 @@ public class TreeEditor extends SimpleApplication {
 
     public static final String GLASS_STYLES = "/com/simsilica/arboreal/ui/glass-styles.groovy";
  
-    private Node hud;
-    private boolean hudOn = true;
-    
     public static void main( String... args ) {        
         TreeEditor main = new TreeEditor();
         
@@ -103,18 +98,10 @@ public class TreeEditor extends SimpleApplication {
               new GroundState(),
               new SkyState(),
               new TreeOptionsState(),
+              new TreeParametersState(),
               new ScreenshotAppState("", System.currentTimeMillis())); 
     }
  
-    public void toggleHud() {
-        hudOn = !hudOn;
-        if( hudOn ) {
-            hud.setCullHint(CullHint.Inherit);
-        } else {
-            hud.setCullHint(CullHint.Always);
-        }       
-    }
-    
     @Override
     public void simpleInitApp() {
     
@@ -126,7 +113,6 @@ public class TreeEditor extends SimpleApplication {
         MainFunctions.initializeDefaultMappings(inputMapper);
         inputMapper.activateGroup( MainFunctions.GROUP );        
         MovementFunctions.initializeDefaultMappings(inputMapper);
-        GuiGlobals.getInstance().getInputMapper().addDelegate(MainFunctions.F_HUD, this, "toggleHud" );
 
         // Now create the normal simple test scene    
         Box b = new Box(1, 1, 1);
@@ -140,9 +126,6 @@ public class TreeEditor extends SimpleApplication {
 
         rootNode.attachChild(geom); 
 
-        hud = new Node("HUD");
-        guiNode.attachChild(hud);
- 
         new StyleLoader(GuiGlobals.getInstance().getStyles()).loadStyleResource(GLASS_STYLES);
  
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                

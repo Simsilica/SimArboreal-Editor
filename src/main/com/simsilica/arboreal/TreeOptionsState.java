@@ -77,6 +77,10 @@ public class TreeOptionsState extends BaseAppState {
     
     public TreeOptionsState() {
     }
+
+    public Container getContents() {
+        return mainContents;
+    }
  
     public Checkbox addOptionToggle( String name, Object target, String method ) {
         Checkbox cb = new Checkbox(name, "glass");
@@ -161,32 +165,4 @@ public class TreeOptionsState extends BaseAppState {
             }
         } 
     }
-         /*
-        Button saveParms = buttons.addChild(new Button("Save Parms", "glass"));
-        saveParms.addClickCommands(new SaveTreeParameters());
-        saveParms.setTextHAlignment(HAlignment.Center);
-
-        Button loadParms = buttons.addChild(new Button("Load Parms", "glass"), 1);
-        loadParms.addClickCommands(new LoadTreeParameters());
-        loadParms.setTextHAlignment(HAlignment.Center);
- 
-        Button saveJ3o = buttons.addChild(new Button("Export j3o", "glass"), 2);
-        saveJ3o.addClickCommands(new SaveJ3o());
-        saveJ3o.setTextHAlignment(HAlignment.Center);
-
-        
-        //needsRegenerate = options.addChild(new Label(" ", "glass"), 1);        
-
-        //RollupPanel test = options.addChild(new RollupPanel("Checks", "glass"));         
- 
-        Container checks = options.addChild(new Container());
-        //Container checks = new Container();
-        //test.setContents(checks);
- 
-        Checkbox wire = checks.addChild(new Checkbox("Show Wireframe", "glass"));
-        wire.addClickCommands(new SetWireframe());
-                
-        Checkbox showTP = checks.addChild(new Checkbox("Show Test Pattern", "glass"), 1);
-        showTP.addClickCommands(new SetTestPattern());        
-           */
 }
