@@ -97,6 +97,7 @@ public class TreeEditor extends SimpleApplication {
               new LightingState(),
               new GroundState(),
               new SkyState(),
+              new AvatarState(),
               new TreeOptionsState(),
               new TreeParametersState(),
               new ScreenshotAppState("", System.currentTimeMillis())); 
