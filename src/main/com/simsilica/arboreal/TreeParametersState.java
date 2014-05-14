@@ -66,8 +66,6 @@ public class TreeParametersState extends BaseAppState {
     private TreeParameters treeParameters;
     private VersionedHolder<TreeParameters> treeParametersHolder = new VersionedHolder<TreeParameters>();
     
-    private TabbedPanel tabs;
-    
     // Keep track of the panels so that we can easily refresh them
     // when loading new files or otherwise changing parameters
     // outside of the UI.
@@ -95,7 +93,7 @@ public class TreeParametersState extends BaseAppState {
     
         List<VersionedReference> versionsList = new ArrayList<VersionedReference>();
     
-        tabs = new TabbedPanel("glass");
+        TabbedPanel tabs = getState(TreeOptionsState.class).getParameterTabs();
                        
         treePanels = new ArrayList<PropertyPanel>();                
         PropertyPanel properties;
@@ -222,7 +220,6 @@ public class TreeParametersState extends BaseAppState {
 
     @Override
     protected void enable() {
-        getState(TreeOptionsState.class).getContents().addChild(tabs);
     }
  
     float nextUpdateCheck = 0.1f;
@@ -245,25 +242,12 @@ public class TreeParametersState extends BaseAppState {
     
     @Override
     protected void disable() {
-        getState(TreeOptionsState.class).getContents().removeChild(tabs);
     }
-    
-}
- /*
  
-        properties = new PropertyPanel("Grid", "glass");
-        versionsList.add(properties.createReference());
-        tabs.addTab("Grid", properties);
-        
-        properties.addIntProperty("Width", forest, "width", 1, 10, 1);
-        properties.addIntProperty("Height", forest, "height", 1, 10, 1);
-        properties.addFloatProperty("Spacing (m)", forest, "spacing", 0.3f, 40, 0.1f);
-        properties.addIntProperty("Seed Range", forest, "seedRange", 1, 100, 1);
-        properties.addFloatProperty("Rotation Variation (*)", forest, "rotationVariation", 0, 1, 0.01f);
-        properties.addFloatProperty("Lean Variation (*)", forest, "leanVariation", 0, 1, 0.01f);
-        properties.addFloatProperty("Scale Variation (*)", forest, "scaleVariation", 0, 1, 0.01f);
-        properties.addFloatProperty("Position Variation (*)", forest, "positionVariation", 0, 1, 0.01f);
-        
-        versions = new VersionedReference[versionsList.size()];
-        versions = versionsList.toArray(versions);
-*/
+    public void refreshTreePanels() {
+        for( PropertyPanel p : treePanels ) {
+            p.refresh();
+        }
+    }   
+}
+

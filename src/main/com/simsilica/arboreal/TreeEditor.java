@@ -103,6 +103,7 @@ public class TreeEditor extends SimpleApplication {
               new TreeOptionsState(),
               new TreeParametersState(),
               new ForestGridState(),
+              new FileActionsState(),
               new ScreenshotAppState("", System.currentTimeMillis())); 
     }
  

@@ -45,9 +45,15 @@ import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
+import com.simsilica.arboreal.ui.PropertyPanel;
+import com.simsilica.lemur.Checkbox;
+import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.Label;
+import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.BaseAppState;
+import com.simsilica.lemur.style.ElementId;
 
 
 /**
@@ -61,7 +67,12 @@ public class ForestGridState extends BaseAppState {
     private ForestGrid forestGrid;
     private TreeBuilderReference mainTree;
  
+    private Label vertsLabel;
+    private Label trisLabel;
+    private boolean building = true;
+ 
     private VersionedReference<TreeParameters> treeParameters;
+    private VersionedReference<PropertyPanel> gridParameters;
     
     private Texture bark;
     private Texture barkNormals;
@@ -73,7 +84,54 @@ public class ForestGridState extends BaseAppState {
     private Material wireMaterial;
     private Material leafMaterial;
 
+    private boolean showTestPattern = false;
+    private boolean showTrunkBumps = false;
+
     public ForestGridState() {
+    }
+ 
+    public Node getMainTreeNode() {
+        return mainTree.getTreeNode();
+    }
+    
+    public void rebuild() {
+        building = true;
+        forestGrid.markChanged();
+        forestGrid.rebuild();
+    }
+ 
+    public void setShowTestPattern( boolean b ) {
+        if( this.showTestPattern == b ) {
+            return;
+        }
+        this.showTestPattern = b;
+        if( showTestPattern ) {
+            treeMaterial.setTexture("DiffuseMap", testPattern);         
+        } else {
+            treeMaterial.setTexture("DiffuseMap", bark);         
+        }
+    }
+ 
+    public boolean getShowTestPattern() {
+        return showTestPattern;
+    }
+
+    public void setShowTrunkBumps( boolean b ) {
+        if( this.showTrunkBumps == b ) {
+            return;
+        }
+        this.showTrunkBumps = b;
+        if( showTrunkBumps ) {
+            treeMaterial.setTexture("NormalMap", barkNormals);
+            treeMaterial.setTexture("ParallaxMap", barkBumps);
+        } else {
+            treeMaterial.clearParam("NormalMap");
+            treeMaterial.clearParam("ParallaxMap");
+        }
+    }
+
+    public boolean getShowTrunkBumps() {
+        return showTrunkBumps;
     }
     
     @Override
@@ -102,7 +160,37 @@ public class ForestGridState extends BaseAppState {
                                 createLeafMaterial(),
                                 getState(BuilderState.class).getBuilder());
  
-        mainTree = forestGrid.getTree(0, 0);   
+        mainTree = forestGrid.getTree(0, 0);
+        
+        
+        // Add some options check boxes for rendering
+        TreeOptionsState options = getState(TreeOptionsState.class);
+        options.addOptionToggle("Show Wireframe", forestGrid, "setShowWireframe");
+        options.addOptionToggle("Show Test Pattern", this, "setShowTestPattern");
+        Checkbox cb = options.addOptionToggle("Show Bump-map", this, "setShowTrunkBumps");
+        cb.setChecked(true);
+                
+        
+        PropertyPanel properties = new PropertyPanel("glass");
+        gridParameters = properties.createReference();
+        options.getParameterTabs().addTab("Grid", properties);
+        
+        properties.addIntProperty("Width", forestGrid, "width", 1, 10, 1);
+        properties.addIntProperty("Height", forestGrid, "height", 1, 10, 1);
+        properties.addFloatProperty("Spacing (m)", forestGrid, "spacing", 0.3f, 40, 0.1f);
+        properties.addIntProperty("Seed Range", forestGrid, "seedRange", 1, 100, 1);
+        properties.addFloatProperty("Rotation Variation (*)", forestGrid, "rotationVariation", 0, 1, 0.01f);
+        properties.addFloatProperty("Lean Variation (*)", forestGrid, "leanVariation", 0, 1, 0.01f);
+        properties.addFloatProperty("Scale Variation (*)", forestGrid, "scaleVariation", 0, 1, 0.01f);
+        properties.addFloatProperty("Position Variation (*)", forestGrid, "positionVariation", 0, 1, 0.01f);
+        
+        
+        // Add a stats panel to the bottom... could have done it as another
+        // state but we already manage all of the geometry here
+        Container stats = options.getContents().addChild(new Container(new SpringGridLayout(), new ElementId("stats"), "glass"));
+        vertsLabel = stats.addChild(new Label("verts:", "glass"));
+        trisLabel = stats.addChild(new Label("tris:", "glass"), 1);
+                        
     }    
 
     @Override
@@ -124,15 +212,32 @@ public class ForestGridState extends BaseAppState {
             return;
         }
         nextUpdateCheck = 0;
-        if( treeParameters.update() ) {
+        
+        boolean changed = treeParameters.update();
+        if( gridParameters.update() ) {
+            changed = true;
+        }
+         
+        if( changed ) {
+            building = true;
             forestGrid.markChanged();
             forestGrid.rebuild();
+        }
+        
+        if( building && getState(BuilderState.class).getBuilder().getPending() == 0 ) {
+            building = false;
+            refreshStats();
         }
     }
 
     @Override
     protected void disable() {
         forestGrid.getRootNode().removeFromParent();                                           
+    }
+    
+    protected void refreshStats() {
+        vertsLabel.setText("verts: " + mainTree.getVertexCount());
+        trisLabel.setText("tris: " + mainTree.getTriangleCount());        
     }
     
     protected Material createTreeMaterial() {
@@ -152,7 +257,11 @@ public class ForestGridState extends BaseAppState {
     }
     
     protected Material createWireMaterial() {
+        if( wireMaterial != null ) {
+            return wireMaterial;
+        }
         Material mat = GuiGlobals.getInstance().createMaterial(ColorRGBA.Yellow, false).getMaterial();
+        wireMaterial = mat;
         mat.getAdditionalRenderState().setWireframe(true);
         return mat;
     }

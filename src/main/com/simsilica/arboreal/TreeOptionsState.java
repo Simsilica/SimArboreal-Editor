@@ -38,6 +38,7 @@ package com.simsilica.arboreal;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.simsilica.arboreal.ui.TabbedPanel;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Checkbox;
 import com.simsilica.lemur.Command;
@@ -69,8 +70,8 @@ public class TreeOptionsState extends BaseAppState {
     private Container mainContents; 
  
     private Container actionsPanel;
-    private Container filePanel;
     private Container checkboxPanel;
+    private TabbedPanel tabs;
  
     private List<Checkbox> optionToggles = new ArrayList<Checkbox>();
     private Map<String, Checkbox> optionToggleMap = new HashMap<String, Checkbox>();
@@ -82,13 +83,21 @@ public class TreeOptionsState extends BaseAppState {
         return mainContents;
     }
  
+    public TabbedPanel getParameterTabs() {
+        return tabs;
+    }
+ 
     public Checkbox addOptionToggle( String name, Object target, String method ) {
         Checkbox cb = new Checkbox(name, "glass");
         cb.addClickCommands(new ToggleHandler(target, method));
                         
         int column = optionToggles.size() % 2;
         if( checkboxPanel != null ) {
-            checkboxPanel.addChild(cb, column);
+            if( column == 0 ) {
+                checkboxPanel.addChild(cb);
+            } else {
+                checkboxPanel.addChild(cb, column);
+            } 
         }
         optionToggles.add(cb);
         optionToggleMap.put(name, cb);
@@ -116,15 +125,20 @@ public class TreeOptionsState extends BaseAppState {
                                                         BorderLayout.Position.Center); 
                
         actionsPanel = mainContents.addChild(new Container());
-        filePanel = mainContents.addChild(new Container());
         checkboxPanel = mainContents.addChild(new Container());
         
         // Add any toggles that were added before init
         int i = 0;
         for( Checkbox cb : optionToggles ) {
             int column = (i++) % 2;
-            checkboxPanel.addChild(cb, column);
-        }                     
+            if( column == 0 ) {
+                checkboxPanel.addChild(cb);
+            } else {
+                checkboxPanel.addChild(cb, column);
+            } 
+        }
+        
+        tabs = mainContents.addChild(new TabbedPanel("glass"));
     }
 
     @Override
