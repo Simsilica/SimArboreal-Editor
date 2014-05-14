@@ -69,6 +69,7 @@ public class TreeOptionsState extends BaseAppState {
     private Container mainWindow;
     private Container mainContents; 
  
+    private Container viewSettingsPanel;
     private Container actionsPanel;
     private Container checkboxPanel;
     private TabbedPanel tabs;
@@ -81,6 +82,10 @@ public class TreeOptionsState extends BaseAppState {
 
     public Container getContents() {
         return mainContents;
+    }
+ 
+    public Container getViewSettings() {
+        return viewSettingsPanel;
     }
  
     public TabbedPanel getParameterTabs() {
@@ -125,6 +130,7 @@ public class TreeOptionsState extends BaseAppState {
                                                         BorderLayout.Position.Center); 
                
         actionsPanel = mainContents.addChild(new Container());
+        viewSettingsPanel = mainContents.addChild(new Container());
         checkboxPanel = mainContents.addChild(new Container());
         
         // Add any toggles that were added before init

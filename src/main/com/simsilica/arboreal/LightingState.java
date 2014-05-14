@@ -41,6 +41,8 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.core.VersionedHolder;
@@ -60,6 +62,8 @@ public class LightingState extends BaseAppState {
     private DirectionalLight sun;
     private ColorRGBA ambientColor;
     private AmbientLight ambient;
+    private float timeOfDay = FastMath.atan2(1, 0.3f) / FastMath.PI;
+    private float inclination = FastMath.HALF_PI - FastMath.atan2(1, 0.4f); 
     
     private Node rootNode;  // the one we added the lights to
     
@@ -68,9 +72,35 @@ public class LightingState extends BaseAppState {
         this.sunColor = ColorRGBA.White.mult(2);
         this.ambientColor = new ColorRGBA(0.25f, 0.25f, 0.25f, 1);
     }
+ 
+    public DirectionalLight getSun() {
+        return sun;
+    }
     
     public VersionedReference<Vector3f> getLightDirRef() {
         return lightDir.createReference();
+    }
+    
+    public void setTimeOfDay( float f ) {
+        if( this.timeOfDay == f ) {
+            return;
+        }
+        this.timeOfDay = f;
+        resetLightDir();        
+    }
+    
+    public float getTimeOfDay() {
+        return timeOfDay;
+    }
+ 
+    protected void resetLightDir() {
+        float angle = timeOfDay * FastMath.PI;
+ 
+        Quaternion q1 = new Quaternion().fromAngles(0, 0, (angle - FastMath.HALF_PI));
+        Quaternion q2 = new Quaternion().fromAngles(inclination, 0, 0);
+        Vector3f dir = q2.mult(q1).mult(Vector3f.UNIT_Y.negate());
+        lightDir.setObject(dir);
+        sun.setDirection(lightDir.getObject());
     }
     
     @Override
@@ -81,6 +111,7 @@ public class LightingState extends BaseAppState {
         
         ambient = new AmbientLight();
         ambient.setColor(ambientColor);
+        resetLightDir();
     }
 
     @Override

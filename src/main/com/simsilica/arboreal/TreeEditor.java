@@ -93,17 +93,18 @@ public class TreeEditor extends SimpleApplication {
     
     public TreeEditor() {
         super(new StatsAppState(), new DebugKeysAppState(),
-              new BuilderState(1, 1), 
+              new BuilderState(1, 1),
               new MovementState(),
               new DebugHudState(),
+              new TreeOptionsState(),
               new LightingState(),
               new GroundState(),
               new SkyState(),
               new AvatarState(),
-              new TreeOptionsState(),
               new TreeParametersState(),
               new ForestGridState(),
-              new FileActionsState(),
+              new FileActionsState(),              
+              new PostProcessorState(), 
               new ScreenshotAppState("", System.currentTimeMillis())); 
     }
  
