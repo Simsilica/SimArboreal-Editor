@@ -94,7 +94,7 @@ public class GroundState extends BaseAppState {
         groundMaterial = GuiGlobals.getInstance().createMaterial(ColorRGBA.Green, true).getMaterial(); 
         
         MBox b = new MBox(500, 0, 500, 50, 0, 50, MBox.TOP_MASK);
-        b.scaleTextureCoordinates(new Vector2f(250, 250));
+        b.scaleTextureCoordinates(new Vector2f(1000, 1000));
         ground = new Geometry("Box", b);
 
         greenMaterial = new Material(assets, "Common/MatDefs/Light/Lighting.j3md");

@@ -64,7 +64,7 @@ public class TreeParametersState extends BaseAppState {
     static Logger log = LoggerFactory.getLogger(TreeParametersState.class);
     
     private TreeParameters treeParameters;
-    private VersionedHolder<TreeParameters> treeParametersHolder = new VersionedHolder<TreeParameters>(treeParameters);
+    private VersionedHolder<TreeParameters> treeParametersHolder = new VersionedHolder<TreeParameters>();
     
     private TabbedPanel tabs;
     
@@ -79,6 +79,7 @@ public class TreeParametersState extends BaseAppState {
     
     public TreeParametersState() {
         this.treeParameters = new TreeParameters(5);
+        this.treeParametersHolder.setObject(treeParameters);
     }
  
     public TreeParameters getTreeParameters() {

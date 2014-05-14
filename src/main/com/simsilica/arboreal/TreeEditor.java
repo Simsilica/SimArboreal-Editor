@@ -92,7 +92,9 @@ public class TreeEditor extends SimpleApplication {
     }
     
     public TreeEditor() {
-        super(new StatsAppState(), new DebugKeysAppState(), new MovementState(),
+        super(new StatsAppState(), new DebugKeysAppState(),
+              new BuilderState(1, 1), 
+              new MovementState(),
               new DebugHudState(),
               new LightingState(),
               new GroundState(),
@@ -100,6 +102,7 @@ public class TreeEditor extends SimpleApplication {
               new AvatarState(),
               new TreeOptionsState(),
               new TreeParametersState(),
+              new ForestGridState(),
               new ScreenshotAppState("", System.currentTimeMillis())); 
     }
  
@@ -115,6 +118,7 @@ public class TreeEditor extends SimpleApplication {
         inputMapper.activateGroup( MainFunctions.GROUP );        
         MovementFunctions.initializeDefaultMappings(inputMapper);
 
+        /*
         // Now create the normal simple test scene    
         Box b = new Box(1, 1, 1);
         Geometry geom = new Geometry("Box", b);
@@ -125,7 +129,8 @@ public class TreeEditor extends SimpleApplication {
         mat.setBoolean("UseMaterialColors", true);
         geom.setMaterial(mat);
 
-        rootNode.attachChild(geom); 
+        rootNode.attachChild(geom);
+        */ 
 
         new StyleLoader(GuiGlobals.getInstance().getStyles()).loadStyleResource(GLASS_STYLES);
  
