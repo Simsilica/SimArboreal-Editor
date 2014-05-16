@@ -40,19 +40,20 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.ScreenshotAppState;
-import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.shape.Box;
+import com.jme3.scene.Mesh;
 import com.jme3.system.AppSettings;
+import com.simsilica.arboreal.mesh.LineMeshGenerator;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.StyleLoader;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,6 +139,32 @@ public class TreeEditor extends SimpleApplication {
  
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
         treeOptions.addOptionToggle("Show Grass", stateManager.getState(GroundState.class), "setShowGrass");                
-        treeOptions.addOptionToggle("Show Sky", stateManager.getState(SkyState.class), "setShowSky");                
-    }        
+        treeOptions.addOptionToggle("Show Sky", stateManager.getState(SkyState.class), "setShowSky");
+        
+        
+ 
+        // Just testing these classes directly       
+        TreeParameters treeParms = stateManager.getState(TreeParametersState.class).getTreeParameters();
+        TreeGenerator treeGen = new TreeGenerator();
+        Tree testTree = treeGen.generateTree(treeParms); 
+ 
+        LineMeshGenerator testGen = new LineMeshGenerator();
+        Mesh mesh = testGen.generateMesh(testTree);
+        
+        Geometry g = new Geometry("test", mesh);
+        g.setMaterial(GuiGlobals.getInstance().createMaterial(ColorRGBA.Red, false).getMaterial());
+        g.setLocalTranslation(5, 0, 0);
+        rootNode.attachChild(g);
+    }
+    
+    protected void addBranches( Vector3f start, Segment seg, List<Vector3f> points ) {
+        
+        points.add(start);
+        Vector3f end = start.add(seg.dir.mult(seg.length));
+        points.add(end);
+        
+        for( Segment child : seg ) {
+            addBranches(end, child, points);
+        }
+    }
 }
