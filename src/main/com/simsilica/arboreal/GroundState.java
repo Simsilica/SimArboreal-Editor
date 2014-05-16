@@ -46,6 +46,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+import com.jme3.util.TangentBinormalGenerator;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.event.BaseAppState;
 import com.simsilica.lemur.geom.MBox;
@@ -94,6 +95,7 @@ public class GroundState extends BaseAppState {
         groundMaterial = GuiGlobals.getInstance().createMaterial(ColorRGBA.Green, true).getMaterial(); 
         
         MBox b = new MBox(500, 0, 500, 50, 0, 50, MBox.TOP_MASK);
+        TangentBinormalGenerator.generate(b);
         b.scaleTextureCoordinates(new Vector2f(1000, 1000));
         ground = new Geometry("Box", b);
 
@@ -123,6 +125,7 @@ public class GroundState extends BaseAppState {
         groundMaterial.setTexture("BackgroundDiffuseMap", texture);
  
         texture = assets.loadTexture("Textures/brown-dirt-norm.jpg");
+        //texture = assets.loadTexture("Textures/bark128-norm.jpg");
         texture.setWrap(WrapMode.Repeat);
         groundMaterial.setTexture("NormalMap", texture);
        
