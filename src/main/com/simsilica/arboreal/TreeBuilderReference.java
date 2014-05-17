@@ -45,10 +45,10 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
-import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.util.BufferUtils;
 import com.simsilica.arboreal.builder.BuilderReference;
+import com.simsilica.arboreal.mesh.SkinnedTreeMeshGenerator;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,15 +236,22 @@ public class TreeBuilderReference implements BuilderReference
 
         Geometry[] geometry = new Geometry[3];       
  
-        Box trunk = new Box(treeParameters.getTrunkRadius(), 
-                            treeParameters.getTrunkHeight() * 0.5f, 
-                            treeParameters.getTrunkRadius());
-        geometry[0] = new Geometry("Tree", trunk);
+        TreeGenerator treeGen = new TreeGenerator();
+        Tree tree = treeGen.generateTree(seed, treeParameters);
         
+        SkinnedTreeMeshGenerator meshGen = new SkinnedTreeMeshGenerator();
+        Mesh treeMesh = meshGen.generateMesh(tree,
+                                             treeParameters.getRootHeight(), 
+                                             treeParameters.getTextureURepeat(),
+                                             treeParameters.getTextureVScale());
+        
+        
+        geometry[0] = new Geometry("Tree", treeMesh);        
         geometry[0].setMaterial(treeMaterial);
         geometry[0].setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+         
 
-        geometry[1] = new Geometry("Tree Wire", trunk);
+        geometry[1] = new Geometry("Tree Wire", treeMesh);
         geometry[1].setMaterial(wireMaterial);
 
         if( treeParameters.getGenerateLeaves() ) {
@@ -261,13 +268,6 @@ public class TreeBuilderReference implements BuilderReference
             }
         }
         
-        // temporary
-        geometry[0].move(0, treeParameters.getTrunkHeight() * 0.5f, 0);
-        geometry[1].move(0, treeParameters.getTrunkHeight() * 0.5f, 0);
-        if( geometry[2] != null ) {
-            geometry[2].move(0, treeParameters.getTrunkHeight(), 0);
-        }
-
         newGeometry = geometry;                
     }    
     
