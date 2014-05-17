@@ -222,6 +222,7 @@ public class ForestGridState extends BaseAppState {
             building = true;
             forestGrid.markChanged();
             forestGrid.rebuild();
+            refreshStats();
         }
         
         if( building && getState(BuilderState.class).getBuilder().getPending() == 0 ) {
@@ -236,8 +237,13 @@ public class ForestGridState extends BaseAppState {
     }
     
     protected void refreshStats() {
-        vertsLabel.setText("verts: " + mainTree.getVertexCount());
-        trisLabel.setText("tris: " + mainTree.getTriangleCount());        
+        if( building ) {
+            vertsLabel.setText("verts: ???");
+            trisLabel.setText("tris: ???");
+        } else {
+            vertsLabel.setText("verts: " + mainTree.getVertexCount());
+            trisLabel.setText("tris: " + mainTree.getTriangleCount());
+        }        
     }
     
     protected Material createTreeMaterial() {
