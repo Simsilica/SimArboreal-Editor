@@ -137,22 +137,7 @@ public class TreeEditor extends SimpleApplication {
  
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
         treeOptions.addOptionToggle("Show Grass", stateManager.getState(GroundState.class), "setShowGrass");                
-        treeOptions.addOptionToggle("Show Sky", stateManager.getState(SkyState.class), "setShowSky");
-        
-        
- 
-        // Just testing these classes directly       
-        TreeParameters treeParms = stateManager.getState(TreeParametersState.class).getTreeParameters();
-        TreeGenerator treeGen = new TreeGenerator();
-        Tree testTree = treeGen.generateTree(treeParms); 
- 
-        LineMeshGenerator testGen = new LineMeshGenerator();
-        Mesh mesh = testGen.generateMesh(testTree);
-        
-        Geometry g = new Geometry("test", mesh);
-        g.setMaterial(GuiGlobals.getInstance().createMaterial(ColorRGBA.Red, false).getMaterial());
-        g.setLocalTranslation(5, 0, 0);
-        rootNode.attachChild(g);
+        treeOptions.addOptionToggle("Show Sky", stateManager.getState(SkyState.class), "setShowSky");               
     }
     
     protected void addBranches( Vector3f start, Segment seg, List<Vector3f> points ) {
