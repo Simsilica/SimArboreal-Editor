@@ -277,9 +277,8 @@ public class ForestGridState extends BaseAppState {
             return leafMaterial;
         }
         
-        //AssetManager assets = getApplication().getAssetManager();
-        //leafMaterial = new Material(assets, "MatDefs/LeafLighting.j3md");
-        leafMaterial = GuiGlobals.getInstance().createMaterial(ColorRGBA.Yellow, true).getMaterial();             
+        AssetManager assets = getApplication().getAssetManager();
+        leafMaterial = new Material(assets, "MatDefs/LeafLighting.j3md");
         leafMaterial.setColor("Diffuse", ColorRGBA.White);
         leafMaterial.setColor("Ambient", ColorRGBA.White);
         leafMaterial.setBoolean("UseMaterialColors", true);

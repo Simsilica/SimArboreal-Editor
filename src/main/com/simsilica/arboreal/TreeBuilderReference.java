@@ -45,10 +45,13 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
-import com.jme3.scene.shape.Sphere;
 import com.jme3.util.BufferUtils;
 import com.simsilica.arboreal.builder.BuilderReference;
+import com.simsilica.arboreal.mesh.BillboardedLeavesMeshGenerator;
 import com.simsilica.arboreal.mesh.SkinnedTreeMeshGenerator;
+import com.simsilica.arboreal.mesh.Vertex;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,12 +243,14 @@ public class TreeBuilderReference implements BuilderReference
         Tree tree = treeGen.generateTree(seed, treeParameters);
         
         SkinnedTreeMeshGenerator meshGen = new SkinnedTreeMeshGenerator();
+        
+        List<Vertex> tips = new ArrayList<Vertex>();
         Mesh treeMesh = meshGen.generateMesh(tree,
                                              treeParameters.getRootHeight(), 
                                              treeParameters.getTextureURepeat(),
-                                             treeParameters.getTextureVScale());
-        
-        
+                                             treeParameters.getTextureVScale(),
+                                             tips);        
+
         geometry[0] = new Geometry("Tree", treeMesh);        
         geometry[0].setMaterial(treeMaterial);
         geometry[0].setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
@@ -255,8 +260,10 @@ public class TreeBuilderReference implements BuilderReference
         geometry[1].setMaterial(wireMaterial);
 
         if( treeParameters.getGenerateLeaves() ) {
-            Sphere s = new Sphere(20, 20, treeParameters.getTrunkRadius() * 5);
-            geometry[2] = new Geometry("Leaves", s);
+            //Sphere s = new Sphere(20, 20, treeParameters.getTrunkRadius() * 5);
+            BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
+            Mesh leafMesh = leafGen.generateMesh(tips, treeParameters.getLeafScale());
+            geometry[2] = new Geometry("Leaves", leafMesh);
             geometry[2].setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
             geometry[2].setQueueBucket(Bucket.Transparent);
             geometry[2].setMaterial(leafMaterial);
