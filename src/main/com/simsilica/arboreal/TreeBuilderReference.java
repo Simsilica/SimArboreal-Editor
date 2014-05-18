@@ -236,7 +236,7 @@ public class TreeBuilderReference implements BuilderReference
 
         Geometry[] geometry = new Geometry[3];       
  
-        TreeGenerator treeGen = new TreeGenerator();
+        TreeGenerator treeGen = new TreeGenerator();        
         Tree tree = treeGen.generateTree(seed, treeParameters);
         
         SkinnedTreeMeshGenerator meshGen = new SkinnedTreeMeshGenerator();

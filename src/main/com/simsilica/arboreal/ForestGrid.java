@@ -274,6 +274,10 @@ public class ForestGrid {
                 trees[i][j].markChanged();
             }
         }
+        
+        // Because it's a value we sort of cache and there
+        // is no external way to detect it's changed.
+        refreshSeed();
     }
     
     public void rebuild() {
