@@ -44,12 +44,15 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.event.BaseAppState;
+import java.awt.Component;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
@@ -104,15 +107,16 @@ public class FileActionsState extends BaseAppState {
  
     private Map<String, File> lastRoots = new HashMap<String, File>();
     protected File chooseFile( String extension, final String description, final boolean save ) {
-        final String extName = extension;
         final String ext = (!extension.startsWith(".") ? "." : "") + extension.toLowerCase();
  
         File lastRoot = lastRoots.get(ext);
         if( lastRoot == null ) {
             lastRoot = new File(".");
         }
-        
+
+        log.info("Creating file chooser dialog...");
         final JFileChooser openDialog = new JFileChooser();
+        
         openDialog.setDialogTitle("Choose Location");
         if( save ) {
             openDialog.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -132,6 +136,8 @@ public class FileActionsState extends BaseAppState {
                         }
                     });
         openDialog.setCurrentDirectory(lastRoot);
+
+        log.info("Opening file chooser dialog...");
         
         final int[] dialogResult = new int[1]; //JFileChooser.CANCEL_OPTION ;
         if( !SwingUtilities.isEventDispatchThread() ) {
