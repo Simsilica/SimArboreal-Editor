@@ -246,6 +246,7 @@ public class TreeBuilderReference implements BuilderReference
         
         List<Vertex> tips = new ArrayList<Vertex>();
         Mesh treeMesh = meshGen.generateMesh(tree,
+                                             treeParameters.getLod(0),
                                              treeParameters.getRootHeight(), 
                                              treeParameters.getTextureURepeat(),
                                              treeParameters.getTextureVScale(),

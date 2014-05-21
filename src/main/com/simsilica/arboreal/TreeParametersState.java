@@ -210,6 +210,37 @@ public class TreeParametersState extends BaseAppState {
         properties.addFloatProperty("Size (m)", treeParameters, "leafScale", 0.1f, 10f, 0.1f);
         
  
+ 
+        // LOD tab
+        Container lodPanels = new Container("glass");
+        tabs.addTab("LOD", lodPanels);
+                       
+        first = null;
+        rollupGroup = new CheckboxModelGroup();
+        for( int i = 0; i < treeParameters.getLodCount(); i++ ) {
+            LevelOfDetailParameters lod = treeParameters.getLod(i);
+        
+            String name = (i == 0) ? "Highest" : ("Level " + i);
+            
+            properties = new PropertyPanel("glass");
+            treePanels.add(properties);
+            versionsList.add(properties.createReference());
+            RollupPanel rollup = lodPanels.addChild(new RollupPanel(name, properties, "glass"));
+            rollup.setOpenModel(rollupGroup.addChild(rollup.getOpenModel()));
+            if( i == 0 ) {
+                first = rollup;
+            } else {
+                rollup.setOpen(false);
+            }
+            
+            properties.addFloatField("Distance (m)", lod, "distance", 0, 1000, 1);
+            properties.addIntField("Branch Depth", lod, "branchDepth", 1, treeParameters.getDepth(), 1); 
+            properties.addIntField("Root Depth", lod, "rootDepth", 1, treeParameters.getDepth(), 1); 
+            properties.addIntField("Max Radial Segments", lod, "maxRadialSegments", 3, 24, 1); 
+        }        
+        first.setOpen(true);
+ 
+ 
         versions = new VersionedReference[versionsList.size()];
         versions = versionsList.toArray(versions);        
     }
