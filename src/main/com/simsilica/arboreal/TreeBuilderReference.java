@@ -43,11 +43,13 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.simsilica.arboreal.builder.BuilderReference;
 import com.simsilica.arboreal.mesh.BillboardedLeavesMeshGenerator;
+import com.simsilica.arboreal.mesh.LodSwitchControl;
 import com.simsilica.arboreal.mesh.SkinnedTreeMeshGenerator;
 import com.simsilica.arboreal.mesh.Vertex;
 import java.util.ArrayList;
@@ -68,20 +70,21 @@ public class TreeBuilderReference implements BuilderReference
     private int priority;
  
     private int seed;   
-    private Node treeNode;
-    private Geometry treeGeom;
     private Material treeMaterial;
-    private Geometry wireGeom;
     private Material wireMaterial;
-    private Geometry leafGeom;
     private Material leafMaterial;
     private TreeParameters treeParameters;
+    
+    private Node treeNode;
  
+    private LevelGeometry[] lods;
+    private volatile LevelGeometry[] newLods;
+     
     private boolean showWire;
     
-    private volatile Geometry[] newGeometry;
     private AtomicInteger needsUpdate = new AtomicInteger(1);
     
+    // For debugging    
     private volatile boolean check = false;
  
     public TreeBuilderReference( TreeParameters treeParameters, 
@@ -92,8 +95,10 @@ public class TreeBuilderReference implements BuilderReference
         this.treeMaterial = treeMaterial;
         this.wireMaterial = wireMaterial;
         this.leafMaterial = leafMaterial;
-        
+ 
+        lods = new LevelGeometry[treeParameters.getLodCount()];       
         treeNode = new Node("Tree");
+        treeNode.addControl(new LodSwitchControl());
     }        
  
     public void setSeed( int seed ) {
@@ -105,13 +110,15 @@ public class TreeBuilderReference implements BuilderReference
             return;
         }
         this.showWire = b;
-        if( wireGeom == null ) {
-            return;
-        }
-        if( showWire ) {
-            wireGeom.setCullHint(CullHint.Inherit);
-        } else {
-            wireGeom.setCullHint(CullHint.Always);
+        for( LevelGeometry level : lods ) {
+            if( level == null ) {
+                continue;
+            }
+            if( showWire ) {
+                level.wireGeom.setCullHint(CullHint.Inherit);
+            } else {
+                level.wireGeom.setCullHint(CullHint.Always);
+            }
         }
     }    
     
@@ -123,30 +130,48 @@ public class TreeBuilderReference implements BuilderReference
         return treeNode;
     }
  
+    public int getVertexCount( int lod ) {
+        LevelGeometry level = lods[lod];
+        if( level == null ) {
+            return 0;
+        }
+        
+        int result = 0;
+        if( level.treeGeom != null ) {
+            Mesh mesh = level.treeGeom.getMesh();
+            result += mesh.getVertexCount();
+        }
+        if( level.leafGeom != null ) {
+            Mesh mesh = level.leafGeom.getMesh();
+            result += mesh.getVertexCount();
+        }
+        return result;       
+    }
+
+    public int getTriangleCount( int lod ) {
+        LevelGeometry level = lods[lod];
+        if( level == null ) {
+            return 0;
+        }
+        
+        int result = 0;
+        if( level.treeGeom != null ) {
+            Mesh mesh = level.treeGeom.getMesh();
+            result += mesh.getTriangleCount();
+        }
+        if( level.leafGeom != null ) {
+            Mesh mesh = level.leafGeom.getMesh();
+            result += mesh.getTriangleCount();
+        }
+        return result;       
+    }
+ 
     public int getVertexCount() {
-        int verts = 0;
-        if( treeGeom != null ) {
-            Mesh mesh = treeGeom.getMesh();
-            verts += mesh.getVertexCount();
-        }
-        if( leafGeom != null ) {
-            Mesh mesh = leafGeom.getMesh();
-            verts += mesh.getVertexCount();
-        }
-        return verts;
+        return getVertexCount(0);
     }
     
     public int getTriangleCount() {
-        int result = 0;
-        if( treeGeom != null ) {
-            Mesh mesh = treeGeom.getMesh();
-            result += mesh.getTriangleCount();
-        }
-        if( leafGeom != null ) {
-            Mesh mesh = leafGeom.getMesh();
-            result += mesh.getTriangleCount();
-        }
-        return result;
+        return getTriangleCount(0);
     }
     
     @Override
@@ -173,7 +198,7 @@ public class TreeBuilderReference implements BuilderReference
     
     @Override
     public void apply() {
-        if( newGeometry == null ) {
+        if( newLods == null ) {
             // Nothing was built
             return;
         }
@@ -182,28 +207,28 @@ public class TreeBuilderReference implements BuilderReference
             log.error( "Ships have passed in the night 1." );
         }
                
-        log.trace("******* applying tree ********" );        
-        // Release the old ones if we had them.        
-        release(treeGeom);
-        release(wireGeom);
-        release(leafGeom);
+        log.trace("******* applying tree ********" );
+ 
+        LodSwitchControl lodControl = treeNode.getControl(LodSwitchControl.class);
+        lodControl.clearLevels();
+                
+        // Release the old ones if we had them.
+        for( LevelGeometry g : lods ) {
+            if( g != null ) {
+                g.release();
+            }
+        }        
  
         // Add in the new ones
-        treeGeom = newGeometry[0];
-        wireGeom = newGeometry[1];
-        leafGeom = newGeometry[2];
-        newGeometry = null;
-        
-        treeNode.attachChild(treeGeom);       
-        treeNode.attachChild(wireGeom);       
-        if( leafGeom != null ) {
-            treeNode.attachChild(leafGeom);
+        for( int i = 0; i < lods.length; i++ ) {
+            lods[i] = newLods[i];
+            lods[i].attach(lodControl);
+            if( !showWire && lods[i] != null ) {
+                lods[i].wireGeom.setCullHint(CullHint.Always);
+            }
         }
-               
-        if( !showWire ) {
-            wireGeom.setCullHint(CullHint.Always);
-        }
-                
+        newLods = null;
+ 
         log.trace("******* tree applied ********" );        
         if( check ) {
             log.error( "Ships have passed in the night 2." );
@@ -212,12 +237,14 @@ public class TreeBuilderReference implements BuilderReference
     
     @Override
     public void release() {
-        release(treeGeom);
-        release(wireGeom);
-        release(leafGeom);
+        for( LevelGeometry g : lods ) {
+            if( g != null ) {
+                g.release();
+            }
+        }        
     }
  
-    protected void release( Geometry geom ) {
+    protected void releaseGeometry( Geometry geom ) {
         if( geom == null ) {
             return;
         }
@@ -237,49 +264,89 @@ public class TreeBuilderReference implements BuilderReference
         
     protected void regenerateTree() {
 
-        Geometry[] geometry = new Geometry[3];       
- 
+        LevelGeometry[] levels = new LevelGeometry[treeParameters.getLodCount()];       
+
         TreeGenerator treeGen = new TreeGenerator();        
         Tree tree = treeGen.generateTree(seed, treeParameters);
+ 
+        List<Vertex> baseTips = null;
+ 
+        for( int i = 0; i < levels.length; i++ ) {
+            
+            LevelOfDetailParameters lodParms = treeParameters.getLod(i);
+            LevelGeometry level = new LevelGeometry(lodParms.distance);
+            levels[i] = level;
+                 
+            SkinnedTreeMeshGenerator meshGen = new SkinnedTreeMeshGenerator();
         
-        SkinnedTreeMeshGenerator meshGen = new SkinnedTreeMeshGenerator();
-        
-        List<Vertex> tips = new ArrayList<Vertex>();
-        Mesh treeMesh = meshGen.generateMesh(tree,
-                                             treeParameters.getLod(0),
-                                             treeParameters.getYOffset(), 
-                                             treeParameters.getTextureURepeat(),
-                                             treeParameters.getTextureVScale(),
-                                             tips);        
+            List<Vertex> tips = null;
+            if( baseTips == null ) {
+                baseTips = tips = new ArrayList<Vertex>();
+            }
+            Mesh treeMesh = meshGen.generateMesh(tree,
+                                                treeParameters.getLod(i),
+                                                treeParameters.getYOffset(), 
+                                                treeParameters.getTextureURepeat(),
+                                                treeParameters.getTextureVScale(),
+                                                tips);        
 
-        geometry[0] = new Geometry("Tree", treeMesh);        
-        geometry[0].setMaterial(treeMaterial);
-        geometry[0].setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-         
-
-        geometry[1] = new Geometry("Tree Wire", treeMesh);
-        geometry[1].setMaterial(wireMaterial);
-
-        if( treeParameters.getGenerateLeaves() ) {
-            //Sphere s = new Sphere(20, 20, treeParameters.getTrunkRadius() * 5);
-            BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
-            Mesh leafMesh = leafGen.generateMesh(tips, treeParameters.getLeafScale());
-            geometry[2] = new Geometry("Leaves", leafMesh);
-            geometry[2].setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-            geometry[2].setQueueBucket(Bucket.Transparent);
-            geometry[2].setMaterial(leafMaterial);
-        }
-
-        for( Geometry geom : geometry ) {
-            if( geom != null ) {
-                geom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+            level.treeGeom = new Geometry("Tree", treeMesh);
+            level.treeGeom.setMaterial(treeMaterial);
+            level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+            level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+            
+            level.wireGeom = new Geometry("Tree Wire", treeMesh);
+            level.wireGeom.setMaterial(wireMaterial);
+            level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+              
+            if( treeParameters.getGenerateLeaves() ) {
+                BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
+                Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
+                level.leafGeom = new Geometry("Leaves", leafMesh);
+                level.leafGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);  
+                level.leafGeom.setQueueBucket(Bucket.Transparent);  
+                level.leafGeom.setMaterial(leafMaterial);  
+                
+                level.leafGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
             }
         }
-        
-        newGeometry = geometry;                
+
+        newLods = levels;
     }    
-    
-    
+ 
+    /**
+     *  Encapsulates all of the tree geometry for a
+     *  particular level of detail.
+     */   
+    private class LevelGeometry {
+ 
+        float distance;
+        Node levelNode;   
+        Geometry treeGeom;
+        Geometry wireGeom;
+        Geometry leafGeom;
+        
+        public LevelGeometry( float distance ) {
+            this.distance = distance;
+        }
+
+        public void attach( LodSwitchControl control ) {
+            levelNode = new Node("level:" + distance);
+            levelNode.attachChild(treeGeom);       
+            levelNode.attachChild(wireGeom);       
+            if( leafGeom != null ) {
+                levelNode.attachChild(leafGeom);
+            }
+            control.addLevel(distance, levelNode);            
+        }
+        
+        public void release() {
+            levelNode.removeFromParent();
+            releaseGeometry(treeGeom);
+            releaseGeometry(wireGeom);
+            releaseGeometry(leafGeom);
+        }
+    }    
 }
 
 
