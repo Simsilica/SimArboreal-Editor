@@ -107,8 +107,9 @@ public class TreeParametersState extends BaseAppState {
         
         properties.addIntProperty("Seed", treeParameters, "seed", 0, 100, 1);
         properties.addFloatProperty("Radius (m)", treeParameters, "trunkRadius", 0.05f, 10f, 0.05f);
-        properties.addFloatProperty("Height (m)", treeParameters, "trunkHeight", 0.5f, 50f, 0.1f);
+        properties.addFloatProperty("Height (m)", treeParameters, "trunkHeight", 0.1f, 50f, 0.1f);
         properties.addFloatProperty("Root Height (m)", treeParameters, "rootHeight", 0f, 10f, 0.1f);
+        properties.addFloatProperty("Y Offset (m)", treeParameters, "YOffset", 0f, 10f, 0.1f);
         properties.addIntProperty("Texture U Repeat", treeParameters, "textureURepeat", 1, 12, 1);
         properties.addFloatProperty("Texture V Scale", treeParameters, "textureVScale", 0.01f, 10f, 0.1f);
         
@@ -149,7 +150,7 @@ public class TreeParametersState extends BaseAppState {
             properties.addFloatField("Angle (rads)", branch, "sideJointStartAngle", 0, FastMath.PI, 0.01f);
             properties.addFloatField("Inclination (rads)", branch, "inclination", 0f, FastMath.HALF_PI, 0.01f);           
             properties.addFloatField("Radius Scale (*)", branch, "radiusScale", 0.01f, 2f, 0.01f);
-            properties.addFloatField("Length Scale (*)", branch, "lengthScale", 0.01f, 4f, 0.01f);
+            properties.addFloatField("Length Scale (*)", branch, "lengthScale", 0.01f, 5f, 0.01f);
                                   
             properties.addBooleanField("Tip Joint", branch, "hasEndJoint");
             properties.addFloatField("Tip Rotation (rads)", branch, "tipRotation", 0f, FastMath.PI, 0.01f);
