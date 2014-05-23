@@ -258,7 +258,7 @@ public class ForestGridState extends BaseAppState {
         treeMaterial.setTexture("DiffuseMap", bark);            
         treeMaterial.setTexture("NormalMap", barkNormals);
         treeMaterial.setTexture("ParallaxMap", barkBumps);                    
-        treeMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        //treeMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         return treeMaterial;
     }
     

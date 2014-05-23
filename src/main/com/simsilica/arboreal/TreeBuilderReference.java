@@ -43,12 +43,12 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.simsilica.arboreal.builder.BuilderReference;
 import com.simsilica.arboreal.mesh.BillboardedLeavesMeshGenerator;
+import com.simsilica.arboreal.mesh.FlatPolyTreeMeshGenerator;
 import com.simsilica.arboreal.mesh.LodSwitchControl;
 import com.simsilica.arboreal.mesh.SkinnedTreeMeshGenerator;
 import com.simsilica.arboreal.mesh.Vertex;
@@ -223,7 +223,7 @@ public class TreeBuilderReference implements BuilderReference
         for( int i = 0; i < lods.length; i++ ) {
             lods[i] = newLods[i];
             lods[i].attach(lodControl);
-            if( !showWire && lods[i] != null ) {
+            if( !showWire && lods[i] != null && lods[i].wireGeom != null ) {
                 lods[i].wireGeom.setCullHint(CullHint.Always);
             }
         }
@@ -276,30 +276,57 @@ public class TreeBuilderReference implements BuilderReference
             LevelOfDetailParameters lodParms = treeParameters.getLod(i);
             LevelGeometry level = new LevelGeometry(lodParms.distance);
             levels[i] = level;
-                 
-            SkinnedTreeMeshGenerator meshGen = new SkinnedTreeMeshGenerator();
-        
+ 
+            Mesh treeMesh = null;
             List<Vertex> tips = null;
-            if( baseTips == null ) {
-                baseTips = tips = new ArrayList<Vertex>();
-            }
-            Mesh treeMesh = meshGen.generateMesh(tree,
-                                                treeParameters.getLod(i),
-                                                treeParameters.getYOffset(), 
-                                                treeParameters.getTextureURepeat(),
-                                                treeParameters.getTextureVScale(),
-                                                tips);
-                                                        
-            level.treeGeom = new Geometry("Tree", treeMesh);
-            level.treeGeom.setMaterial(treeMaterial);
-            level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-            level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
             
-            level.wireGeom = new Geometry("Tree Wire", treeMesh);
-            level.wireGeom.setMaterial(wireMaterial);
-            level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+            switch( lodParms.reduction ) {
+                case Normal:                 
+                    SkinnedTreeMeshGenerator meshGen = new SkinnedTreeMeshGenerator();
+        
+                    if( baseTips == null ) {
+                        baseTips = tips = new ArrayList<Vertex>();
+                    }
+                    treeMesh = meshGen.generateMesh(tree,
+                                                    treeParameters.getLod(i),
+                                                    treeParameters.getYOffset(), 
+                                                    treeParameters.getTextureURepeat(),
+                                                    treeParameters.getTextureVScale(),
+                                                    tips);
+                                                        
+                    level.treeGeom = new Geometry("Tree", treeMesh);
+                    level.treeGeom.setMaterial(treeMaterial);
+                    level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+                    level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+                    break;
+                case FlatPoly:
+                    FlatPolyTreeMeshGenerator polyGen = new FlatPolyTreeMeshGenerator();
+                    if( baseTips == null ) {
+                        baseTips = tips = new ArrayList<Vertex>();
+                    }
+                    treeMesh = polyGen.generateMesh(tree, 
+                                                    treeParameters.getLod(i),
+                                                    treeParameters.getYOffset(), 
+                                                    treeParameters.getTextureURepeat(),
+                                                    treeParameters.getTextureVScale(),
+                                                    tips);
+
+                    level.treeGeom = new Geometry("Tree", treeMesh);
+                    level.treeGeom.setMaterial(treeMaterial);
+                    level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+                    level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);                
+                    break;
+                case Impostor:
+                    break;
+            }
+ 
+            if( treeMesh != null ) {           
+                level.wireGeom = new Geometry("Tree Wire", treeMesh);
+                level.wireGeom.setMaterial(wireMaterial);
+                level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+            }
               
-            if( treeParameters.getGenerateLeaves() ) {
+            if( treeParameters.getGenerateLeaves() && baseTips != null ) {
                 BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
                 Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
                 level.leafGeom = new Geometry("Leaves", leafMesh);
@@ -332,8 +359,10 @@ public class TreeBuilderReference implements BuilderReference
 
         public void attach( LodSwitchControl control ) {
             levelNode = new Node("level:" + distance);
-            levelNode.attachChild(treeGeom);       
-            levelNode.attachChild(wireGeom);       
+            if( treeGeom != null ) {
+                levelNode.attachChild(treeGeom);                       
+                levelNode.attachChild(wireGeom);       
+            }
             if( leafGeom != null ) {
                 levelNode.attachChild(leafGeom);
             }
