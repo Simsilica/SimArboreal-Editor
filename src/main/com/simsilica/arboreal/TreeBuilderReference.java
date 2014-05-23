@@ -288,8 +288,8 @@ public class TreeBuilderReference implements BuilderReference
                                                 treeParameters.getYOffset(), 
                                                 treeParameters.getTextureURepeat(),
                                                 treeParameters.getTextureVScale(),
-                                                tips);        
-
+                                                tips);
+                                                        
             level.treeGeom = new Geometry("Tree", treeMesh);
             level.treeGeom.setMaterial(treeMaterial);
             level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
