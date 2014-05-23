@@ -179,6 +179,12 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
         return p;
     }
 
+    public Property<Enum> addEnumProperty( String name, Object bean, String property ) {
+        EnumProperty p = new EnumProperty(name, new PropertyAccess(bean, property));
+        addProperty(p);
+        return p;
+    }
+    
     public Property<Boolean> addBooleanField( String name, Object bean, String field ) {
         BooleanProperty p = new BooleanProperty(name, new FieldAccess(bean, field));
         addProperty(p);
@@ -193,6 +199,12 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
 
     public Property<Integer> addIntField( String name, Object bean, String field, int min, int max, int step ) {
         IntProperty p = new IntProperty(name, new FieldAccess(bean, field), min, max, step);
+        addProperty(p);
+        return p;
+    }
+    
+    public Property<Enum> addEnumField( String name, Object bean, String field ) {
+        EnumProperty p = new EnumProperty(name, new FieldAccess(bean, field));
         addProperty(p);
         return p;
     }
@@ -282,6 +294,7 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
     protected interface Access<T> {
         public void setValue( T value );
         public T getValue();
+        public Class getType();
     }
  
     protected class PropertyAccess<T> implements Access<T> {
@@ -305,6 +318,11 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
         public T getValue() {
             return getPropertyValue(pd, bean);
         }
+
+        @Override        
+        public Class getType() {
+            return pd.getPropertyType();
+        }
     }
  
     protected class FieldAccess<T> implements Access<T> {
@@ -327,6 +345,11 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
         @Override
         public T getValue() {
             return getFieldValue(fd, bean);
+        }
+        
+        @Override        
+        public Class getType() {
+            return fd.getType();
         }
     }
     
@@ -490,6 +513,61 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
         public void refresh() {
             Integer current = getValue();
             model.setValue(current);
+        }
+    }
+    
+    protected class EnumProperty extends AbstractProperty<Enum> {
+        private Label label;
+        private Label valueText;
+        private Slider slider;
+        private RangedValueModel model;
+        private VersionedReference<Double> value;
+        private Class type;
+        private Enum[] values;
+        
+        public EnumProperty( String name, Access<Enum> access ) {
+            super(name, access);
+ 
+            this.type = access.getType();
+            this.values = (Enum[])type.getEnumConstants();  
+ 
+            this.model = new DefaultRangedValueModel( 0, values.length - 1, 0 );
+        }
+        
+        @Override
+        public void initialize( Container container ) {
+            label = new Label(getDisplayName() + ":", getElementId().child("enum.label"), getStyle());
+            label.setTextHAlignment(HAlignment.Right); 
+            slider = new Slider( model, Axis.X, getElementId().child("enum.slider"), getStyle());
+            refresh();
+            valueText = new Label("", getElementId().child("value.label"), getStyle());
+            updateText();
+                        
+            value = slider.getModel().createReference();
+            container.addChild(label);
+            container.addChild(valueText, 1); 
+            container.addChild(slider, 2); 
+        }
+
+        protected void updateText() {
+            int index = (int)model.getValue();
+            valueText.setText(String.valueOf(values[index]));        
+        }
+        
+        @Override
+        public void update() {
+            if( value.update() ) {
+                int i = (int)model.getValue();                
+                super.setValue(values[i]);
+                updateText();
+            }
+        }
+        
+        @Override
+        public void refresh() {
+            Enum current = getValue();
+            int index = current.ordinal();
+            model.setValue(index);
         }
     }
 }

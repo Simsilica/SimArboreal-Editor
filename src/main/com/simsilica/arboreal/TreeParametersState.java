@@ -237,7 +237,8 @@ public class TreeParametersState extends BaseAppState {
             properties.addFloatField("Distance (m)", lod, "distance", 0, 1000, 1);
             properties.addIntField("Branch Depth", lod, "branchDepth", 1, treeParameters.getDepth(), 1); 
             properties.addIntField("Root Depth", lod, "rootDepth", 1, treeParameters.getDepth(), 1); 
-            properties.addIntField("Max Radial Segments", lod, "maxRadialSegments", 3, 24, 1); 
+            properties.addIntField("Max Radial Segments", lod, "maxRadialSegments", 3, 24, 1);
+            properties.addEnumField("Mesh Type", lod, "reduction"); 
         }        
         first.setOpen(true);
  
