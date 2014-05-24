@@ -86,7 +86,7 @@ public class ForestGridState extends BaseAppState {
     private Material leafMaterial;
 
     private boolean showTestPattern = false;
-    private boolean showTrunkBumps = false;
+    private boolean showTrunkBumps = true;
 
     public ForestGridState() {
     }
@@ -108,8 +108,10 @@ public class ForestGridState extends BaseAppState {
         this.showTestPattern = b;
         if( showTestPattern ) {
             treeMaterial.setTexture("DiffuseMap", testPattern);         
+            flatMaterial.setTexture("DiffuseMap", testPattern);         
         } else {
             treeMaterial.setTexture("DiffuseMap", bark);         
+            flatMaterial.setTexture("DiffuseMap", bark);         
         }
     }
  
