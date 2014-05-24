@@ -52,6 +52,7 @@ import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.core.VersionedHolder;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.BaseAppState;
+import com.simsilica.lemur.style.ElementId;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -130,10 +131,13 @@ public class TreeParametersState extends BaseAppState {
         for( int i = 0; i < treeParameters.getDepth(); i++ ) {
             BranchParameters branch = treeParameters.getBranch(i);
             
-            properties = new PropertyPanel("glass");
+            Container nested = new Container("glass");            
+            properties = new PropertyPanel(new ElementId("nestedProperties"), "glass");
+            nested.addChild(properties);
+            
             treePanels.add(properties);
             versionsList.add(properties.createReference());
-            RollupPanel rollup = branchPanels.addChild(new RollupPanel("Level " + i, properties, "glass"));                     
+            RollupPanel rollup = branchPanels.addChild(new RollupPanel("Level " + i, nested, "glass"));                     
             rollup.setOpenModel(rollupGroup.addChild(rollup.getOpenModel()));
             if( i > 0 ) {
                 // The first panel cannot be disabled so we only
@@ -155,6 +159,12 @@ public class TreeParametersState extends BaseAppState {
  
  
             properties.addIntField("Side Joints", branch, "sideJointCount", 0, 8, 1);
+ 
+            properties = new PropertyPanel(new ElementId("nestedProperties"), "glass");
+            nested.addChild(properties);
+            treePanels.add(properties);
+            versionsList.add(properties.createReference());
+            
             properties.addFloatField("Angle (rads)", branch, "sideJointStartAngle", 0, FastMath.PI, 0.01f);
             properties.addFloatField("Inclination (rads)", branch, "inclination", 0f, FastMath.HALF_PI, 0.01f);           
             properties.addFloatField("Radius Scale (*)", branch, "radiusScale", 0.01f, 2f, 0.01f);
@@ -175,10 +185,13 @@ public class TreeParametersState extends BaseAppState {
         for( int i = 0; i < treeParameters.getDepth(); i++ ) {
             BranchParameters branch = treeParameters.getRoot(i);
             
-            properties = new PropertyPanel("glass");
+            Container nested = new Container("glass");            
+            properties = new PropertyPanel(new ElementId("nestedProperties"), "glass");
+            nested.addChild(properties);
+            
             treePanels.add(properties);
             versionsList.add(properties.createReference());
-            RollupPanel rollup = rootPanels.addChild(new RollupPanel("Level " + i, properties, "glass"));                     
+            RollupPanel rollup = rootPanels.addChild(new RollupPanel("Level " + i, nested, "glass"));                     
             rollup.setOpenModel(rollupGroup.addChild(rollup.getOpenModel()));
             if( i > 0 ) {
                 // The first panel cannot be disabled so we only
@@ -198,8 +211,13 @@ public class TreeParametersState extends BaseAppState {
             properties.addFloatField("Twist (rads)", branch, "twist", 0f, FastMath.PI, 0.01f);                                   
             properties.addFloatField("Gravity (*)", branch, "gravity", -1f, 1f, 0.1f);           
  
- 
             properties.addIntField("Side Joints", branch, "sideJointCount", 0, 8, 1);
+ 
+            properties = new PropertyPanel(new ElementId("nestedProperties"), "glass");
+            nested.addChild(properties);
+            treePanels.add(properties);
+            versionsList.add(properties.createReference());
+            
             properties.addFloatField("Angle (rads)", branch, "sideJointStartAngle", 0, FastMath.PI, 0.01f);
             properties.addFloatField("Inclination (rads)", branch, "inclination", 0f, FastMath.HALF_PI, 0.01f);           
             properties.addFloatField("Radius Scale (*)", branch, "radiusScale", 0.01f, 2f, 0.01f);

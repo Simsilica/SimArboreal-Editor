@@ -73,6 +73,10 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
     public PropertyPanel( String style ) {
         this(true, new ElementId("properties"), style);
     }
+
+    public PropertyPanel( ElementId elementId, String style ) {
+        this(true, elementId, style);
+    }
     
     protected PropertyPanel( boolean applyStyles, ElementId elementId, String style ) {
         super(false, elementId, style);

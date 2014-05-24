@@ -20,6 +20,11 @@ def border = TbtQuadBackgroundComponent.create(
                                                  generateMips:false ),
                                                  1, 1, 1, 6, 6,
                                                  1f, false );
+def border2 = TbtQuadBackgroundComponent.create(
+                                        texture( name:"/com/simsilica/lemur/icons/border.png", 
+                                                 generateMips:false ),
+                                                 1, 2, 2, 6, 6,
+                                                 1f, false );
  
 def doubleGradient = new QuadBackgroundComponent( color(0.5, 0.75, 0.85, 0.5) );  
 doubleGradient.texture = texture( name:"/com/simsilica/lemur/icons/double-gradient-128.png", 
@@ -41,6 +46,11 @@ selector( "label", "glass" ) {
 selector( "container", "glass" ) {
     background = gradient.clone()
     background.setColor(color(0.25, 0.5, 0.5, 0.5))
+}
+
+selector( "nestedProperties.container", "glass" ) {
+    background = border2.clone();
+    background.setColor(color(0.0, 0.0, 0.0, 0.5))
 }
 
 selector( "stats", "glass" ) {
