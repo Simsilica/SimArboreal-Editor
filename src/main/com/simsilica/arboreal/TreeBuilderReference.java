@@ -108,8 +108,8 @@ public class TreeBuilderReference implements BuilderReference
         // We'll derive the flat wire material from the flat material
         flatWireMaterial = flatMaterial.clone();
         flatWireMaterial.clearParam("DiffuseMap");
-        flatWireMaterial.setColor("Diffuse", ColorRGBA.Yellow);
-        flatWireMaterial.setColor("Ambient", ColorRGBA.Yellow);
+        flatWireMaterial.setColor("Diffuse", ColorRGBA.Yellow.mult(10));
+        flatWireMaterial.setColor("Ambient", ColorRGBA.Yellow.mult(10));
         flatWireMaterial.getAdditionalRenderState().setWireframe(true);
     }        
  
