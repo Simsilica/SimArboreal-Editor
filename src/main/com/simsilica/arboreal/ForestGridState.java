@@ -82,6 +82,7 @@ public class ForestGridState extends BaseAppState {
     
     private Material treeMaterial;
     private Material wireMaterial;
+    private Material flatMaterial;
     private Material leafMaterial;
 
     private boolean showTestPattern = false;
@@ -158,6 +159,7 @@ public class ForestGridState extends BaseAppState {
                                 createTreeMaterial(),
                                 createWireMaterial(),
                                 createLeafMaterial(),
+                                createFlatMaterial(),
                                 getState(BuilderState.class).getBuilder());
  
         mainTree = forestGrid.getTree(0, 0);
@@ -260,6 +262,20 @@ public class ForestGridState extends BaseAppState {
         treeMaterial.setTexture("ParallaxMap", barkBumps);                    
         //treeMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         return treeMaterial;
+    }
+ 
+    protected Material createFlatMaterial() {
+        if( flatMaterial != null ) {
+            return flatMaterial;
+        }
+        
+        flatMaterial = new Material(getApplication().getAssetManager(), "MatDefs/AxisBillboardLighting.j3md");
+        flatMaterial.setColor("Diffuse", ColorRGBA.White);
+        flatMaterial.setColor("Ambient", ColorRGBA.White);
+        flatMaterial.setBoolean("UseMaterialColors", true);
+        flatMaterial.setTexture("DiffuseMap", bark);            
+        flatMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        return flatMaterial;
     }
     
     protected Material createWireMaterial() {

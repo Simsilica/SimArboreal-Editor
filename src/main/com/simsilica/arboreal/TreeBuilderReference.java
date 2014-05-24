@@ -73,6 +73,7 @@ public class TreeBuilderReference implements BuilderReference
     private Material treeMaterial;
     private Material wireMaterial;
     private Material leafMaterial;
+    private Material flatMaterial;
     private TreeParameters treeParameters;
     
     private Node treeNode;
@@ -90,11 +91,13 @@ public class TreeBuilderReference implements BuilderReference
     public TreeBuilderReference( TreeParameters treeParameters, 
                                  Material treeMaterial, 
                                  Material wireMaterial,
-                                 Material leafMaterial ) {
+                                 Material leafMaterial,
+                                 Material flatMaterial ) {
         this.treeParameters = treeParameters;
         this.treeMaterial = treeMaterial;
         this.wireMaterial = wireMaterial;
         this.leafMaterial = leafMaterial;
+        this.flatMaterial = flatMaterial;
  
         lods = new LevelGeometry[treeParameters.getLodCount()];       
         treeNode = new Node("Tree");
@@ -312,7 +315,7 @@ public class TreeBuilderReference implements BuilderReference
                                                     tips);
 
                     level.treeGeom = new Geometry("Tree", treeMesh);
-                    level.treeGeom.setMaterial(treeMaterial);
+                    level.treeGeom.setMaterial(flatMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
                     level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);                
                     break;

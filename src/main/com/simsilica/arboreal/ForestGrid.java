@@ -71,6 +71,7 @@ public class ForestGrid {
     private Material treeMaterial; 
     private Material wireMaterial;
     private Material leafMaterial;
+    private Material flatMaterial;
  
     private boolean showWireframe;
     private boolean showLeaves;
@@ -79,11 +80,13 @@ public class ForestGrid {
                        Material treeMaterial,
                        Material wireMaterial,
                        Material leafMaterial,
+                       Material flatMaterial,
                        Builder builder ) {         
         this.treeParameters = treeParameters;
         this.treeMaterial = treeMaterial;
         this.wireMaterial = wireMaterial;
         this.leafMaterial = leafMaterial;                       
+        this.flatMaterial = flatMaterial;                       
         this.builder = builder;
         this.root = new Node("Forest"); 
         this.spacing = 5;
@@ -248,7 +251,8 @@ public class ForestGrid {
                     trees[i][j] = new TreeBuilderReference(treeParameters, 
                                                            treeMaterial, 
                                                            wireMaterial, 
-                                                           leafMaterial);
+                                                           leafMaterial,
+                                                           flatMaterial);
                     Node tree = trees[i][j].getTreeNode();
                     tree.setLocalTranslation(i * spacing, 0, j * spacing);
                     tree.setLocalScale(treeParameters.getBaseScale());
