@@ -438,9 +438,11 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
             label.setTextHAlignment(HAlignment.Right); 
             slider = new Slider( model, Axis.X, getElementId().child("float.slider"), getStyle());
             slider.setDelta(step);
-            Float current = getValue();
-            model.setValue(current);
-            valueText = new Label(String.format(format, current), getElementId().child("value.label"), getStyle());
+            //Float current = getValue();
+            //model.setValue(current);
+            refresh();
+            valueText = new Label("", getElementId().child("value.label"), getStyle());
+            updateText();
                         
             value = slider.getModel().createReference();
             container.addChild(label);
@@ -448,11 +450,15 @@ public class PropertyPanel extends Panel implements VersionedObject<PropertyPane
             container.addChild(slider, 2); 
         }
 
+        protected void updateText() {
+            valueText.setText(String.format(format, model.getValue()));
+        }
+
         @Override
         public void update() {
             if( value.update() ) {
                 super.setValue((float)model.getValue());
-                valueText.setText(String.format(format, model.getValue()));
+                updateText();
             }
         }
         
