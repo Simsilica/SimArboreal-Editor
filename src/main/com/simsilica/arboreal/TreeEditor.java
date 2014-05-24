@@ -89,7 +89,7 @@ public class TreeEditor extends SimpleApplication {
         
         main.start();
     }
-    
+ 
     public TreeEditor() {
         super(new StatsAppState(), new DebugKeysAppState(),
               new BuilderState(1, 1),
