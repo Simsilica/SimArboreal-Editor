@@ -94,7 +94,12 @@ public class AvatarState extends BaseAppState {
         male.setLocalScale(maleScale);
         male.setMaterial(mat);
         male.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);        
-        avatars.attachChild(male);    
+        avatars.attachChild(male);
+        
+        // For testing
+        //Spatial tree = assets.loadModel("Models/test1.j3o");
+        //tree.setLocalTranslation(-20, 0, -20);
+        //avatars.attachChild(tree);    
     } 
 
     @Override
