@@ -51,6 +51,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.SpringGridLayout;
+import com.simsilica.lemur.core.VersionedHolder;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.BaseAppState;
 import com.simsilica.lemur.style.ElementId;
@@ -69,7 +70,7 @@ public class ForestGridState extends BaseAppState {
  
     private Label vertsLabel;
     private Label trisLabel;
-    private boolean building = true;
+    private VersionedHolder<Boolean> building = new VersionedHolder<Boolean>(true);
  
     private VersionedReference<TreeParameters> treeParameters;
     private VersionedReference<PropertyPanel> gridParameters;
@@ -91,12 +92,20 @@ public class ForestGridState extends BaseAppState {
     public ForestGridState() {
     }
  
+    public VersionedReference<Boolean> getBuildingRef() {
+        return building.createReference();
+    }
+ 
+    public TreeBuilderReference getMainTree() {
+        return mainTree;
+    }
+ 
     public Node getMainTreeNode() {
         return mainTree.getTreeNode();
     }
     
     public void rebuild() {
-        building = true;
+        building.setObject(true);
         forestGrid.markChanged();
         forestGrid.rebuild();
     }
@@ -223,14 +232,14 @@ public class ForestGridState extends BaseAppState {
         }
          
         if( changed ) {
-            building = true;
+            building.setObject(true);
             forestGrid.markChanged();
             forestGrid.rebuild();
             refreshStats();
         }
         
-        if( building && getState(BuilderState.class).getBuilder().getPending() == 0 ) {
-            building = false;
+        if( building.getObject() && getState(BuilderState.class).getBuilder().getPending() == 0 ) {
+            building.setObject(false);
             refreshStats();
         }
     }
@@ -241,7 +250,7 @@ public class ForestGridState extends BaseAppState {
     }
     
     protected void refreshStats() {
-        if( building ) {
+        if( building.getObject() ) {
             vertsLabel.setText("verts: ???");
             trisLabel.setText("tris: ???");
         } else {

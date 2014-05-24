@@ -42,8 +42,13 @@ import com.simsilica.arboreal.ui.CheckboxModelGroup;
 import com.simsilica.arboreal.ui.PropertyPanel;
 import com.simsilica.arboreal.ui.RollupPanel;
 import com.simsilica.arboreal.ui.TabbedPanel;
+import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Checkbox;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.FillMode;
+import com.simsilica.lemur.Label;
+import com.simsilica.lemur.component.BorderLayout;
+import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.core.VersionedHolder;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.BaseAppState;
@@ -74,6 +79,9 @@ public class TreeParametersState extends BaseAppState {
     // Keep the array of version refs for easy tracking
     // of changes across all parameters.       
     private VersionedReference[] versions;
+ 
+    private VersionedReference<Boolean> building;   
+    private LevelStats[] levelStats;
     
     public TreeParametersState() {
         this.treeParameters = new TreeParameters(5);
@@ -216,6 +224,8 @@ public class TreeParametersState extends BaseAppState {
         Container lodPanels = new Container("glass");
         tabs.addTab("LOD", lodPanels);
                        
+        levelStats = new LevelStats[treeParameters.getLodCount()];
+         
         first = null;
         rollupGroup = new CheckboxModelGroup();
         for( int i = 0; i < treeParameters.getLodCount(); i++ ) {
@@ -223,10 +233,13 @@ public class TreeParametersState extends BaseAppState {
         
             String name = (i == 0) ? "Highest" : ("Level " + i);
             
+            Container nested = new Container(new BorderLayout());
+            levelStats[i] = nested.addChild(new LevelStats(i), BorderLayout.Position.South);
             properties = new PropertyPanel("glass");
+            nested.addChild(properties, BorderLayout.Position.Center);
             treePanels.add(properties);
             versionsList.add(properties.createReference());
-            RollupPanel rollup = lodPanels.addChild(new RollupPanel(name, properties, "glass"));
+            RollupPanel rollup = lodPanels.addChild(new RollupPanel(name, nested, "glass"));
             rollup.setOpenModel(rollupGroup.addChild(rollup.getOpenModel()));
             if( i == 0 ) {
                 first = rollup;
@@ -271,6 +284,16 @@ public class TreeParametersState extends BaseAppState {
                 treeParametersHolder.incrementVersion();
             }
         }
+        
+        // See if we need to update the LOD stats
+        if( building == null ) {
+            // We haven't retrieved it yet.  We get attached before
+            // ForedGridState so we have to grab this lazily.
+            building = getState(ForestGridState.class).getBuildingRef();
+            refreshStats();
+        } else if( building.update() ) {
+            refreshStats();
+        }        
     }
     
     @Override
@@ -281,6 +304,38 @@ public class TreeParametersState extends BaseAppState {
         for( PropertyPanel p : treePanels ) {
             p.refresh();
         }
+    }
+    
+    protected void refreshStats() {
+        boolean ready = !building.get();
+        for( LevelStats stats : levelStats ) {
+            stats.update(ready);
+        }
     }   
+    
+    private class LevelStats extends Container {
+        
+        int level;
+        Label verts;
+        Label tris;
+        
+        public LevelStats( int level ) {
+            super(new SpringGridLayout(Axis.X, Axis.Y, FillMode.Even, FillMode.Even));
+            this.level = level;
+            this.verts = addChild(new Label("LOD verts: ???", "glass"));
+            this.tris = addChild(new Label("tris: ???", "glass"));
+        }
+        
+        protected void update( boolean ready ) {
+            if( ready ) {
+                TreeBuilderReference tree = getState(ForestGridState.class).getMainTree();
+                verts.setText("LOD verts: " + tree.getVertexCount(level));
+                tris.setText("tris: " + tree.getTriangleCount(level));
+            } else {
+                verts.setText("LOD verts: ???");
+                tris.setText("tris: ???");
+            }
+        }
+    }
 }
 
