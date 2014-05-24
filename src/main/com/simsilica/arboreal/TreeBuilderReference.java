@@ -38,6 +38,7 @@ package com.simsilica.arboreal;
 
 
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
@@ -74,6 +75,7 @@ public class TreeBuilderReference implements BuilderReference
     private Material wireMaterial;
     private Material leafMaterial;
     private Material flatMaterial;
+    private Material flatWireMaterial;
     private TreeParameters treeParameters;
     
     private Node treeNode;
@@ -102,6 +104,13 @@ public class TreeBuilderReference implements BuilderReference
         lods = new LevelGeometry[treeParameters.getLodCount()];       
         treeNode = new Node("Tree");
         treeNode.addControl(new LodSwitchControl());
+        
+        // We'll derive the flat wire material from the flat material
+        flatWireMaterial = flatMaterial.clone();
+        flatWireMaterial.clearParam("DiffuseMap");
+        flatWireMaterial.setColor("Diffuse", ColorRGBA.Yellow);
+        flatWireMaterial.setColor("Ambient", ColorRGBA.Yellow);
+        flatWireMaterial.getAdditionalRenderState().setWireframe(true);
     }        
  
     public void setSeed( int seed ) {
@@ -301,6 +310,10 @@ public class TreeBuilderReference implements BuilderReference
                     level.treeGeom.setMaterial(treeMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
                     level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+                    
+                    level.wireGeom = new Geometry("Tree Wire", treeMesh);
+                    level.wireGeom.setMaterial(wireMaterial);
+                    level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
                     break;
                 case FlatPoly:
                     FlatPolyTreeMeshGenerator polyGen = new FlatPolyTreeMeshGenerator();
@@ -317,18 +330,16 @@ public class TreeBuilderReference implements BuilderReference
                     level.treeGeom = new Geometry("Tree", treeMesh);
                     level.treeGeom.setMaterial(flatMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-                    level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);                
+                    level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+                                    
+                    level.wireGeom = new Geometry("Tree Wire", treeMesh);
+                    level.wireGeom.setMaterial(flatWireMaterial);
+                    level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
                     break;
                 case Impostor:
                     break;
             }
  
-            if( treeMesh != null ) {           
-                level.wireGeom = new Geometry("Tree Wire", treeMesh);
-                level.wireGeom.setMaterial(wireMaterial);
-                level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
-            }
-              
             if( treeParameters.getGenerateLeaves() && baseTips != null ) {
                 BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
                 Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
