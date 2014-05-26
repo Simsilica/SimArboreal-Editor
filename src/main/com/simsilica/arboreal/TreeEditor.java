@@ -69,7 +69,7 @@ public class TreeEditor extends SimpleApplication {
  
     public static void main( String... args ) {        
         TreeEditor main = new TreeEditor();
-        
+
         AppSettings settings = new AppSettings(false);
         settings.setTitle("SimArboreal Tree Editor");
         settings.setSettingsDialogImage("/com/simsilica/arboreal/images/TreeEditor-Splash.png");
@@ -102,6 +102,7 @@ public class TreeEditor extends SimpleApplication {
               new AvatarState(),
               new TreeParametersState(),
               new ForestGridState(),
+              new AtlasGeneratorState(),
               new FileActionsState(),              
               new PostProcessorState(), 
               new ScreenshotAppState("", System.currentTimeMillis())); 

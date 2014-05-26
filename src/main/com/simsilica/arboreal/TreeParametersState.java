@@ -99,7 +99,7 @@ public class TreeParametersState extends BaseAppState {
  
     @Override
     protected void initialize( Application app ) {
-    
+
         List<VersionedReference> versionsList = new ArrayList<VersionedReference>();
     
         TabbedPanel tabs = getState(TreeOptionsState.class).getParameterTabs();

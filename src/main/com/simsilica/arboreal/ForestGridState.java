@@ -1,5 +1,5 @@
 /*
- * ${Id}
+ * $Id$
  *
  * Copyright (c) 2014, Simsilica, LLC
  * All rights reserved.
@@ -84,6 +84,7 @@ public class ForestGridState extends BaseAppState {
     private Material treeMaterial;
     private Material wireMaterial;
     private Material flatMaterial;
+    private Material impostorMaterial;
     private Material leafMaterial;
 
     private boolean showTestPattern = false;
@@ -167,10 +168,11 @@ public class ForestGridState extends BaseAppState {
         treeParameters = getState(TreeParametersState.class).getTreeParametersRef();
         
         forestGrid = new ForestGrid(treeParameters.get(), 
-                                createTreeMaterial(),
-                                createWireMaterial(),
-                                createLeafMaterial(),
-                                createFlatMaterial(),
+                                getTreeMaterial(),
+                                getWireMaterial(),
+                                getLeafMaterial(),
+                                getFlatMaterial(),
+                                getImpostorMaterial(),
                                 getState(BuilderState.class).getBuilder());
  
         mainTree = forestGrid.getTree(0, 0);
@@ -259,7 +261,7 @@ public class ForestGridState extends BaseAppState {
         }        
     }
     
-    protected Material createTreeMaterial() {
+    public Material getTreeMaterial() {
         if( treeMaterial != null ) {
             return treeMaterial;
         }
@@ -275,7 +277,7 @@ public class ForestGridState extends BaseAppState {
         return treeMaterial;
     }
  
-    protected Material createFlatMaterial() {
+    public Material getFlatMaterial() {
         if( flatMaterial != null ) {
             return flatMaterial;
         }
@@ -288,8 +290,29 @@ public class ForestGridState extends BaseAppState {
         flatMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         return flatMaterial;
     }
+
+    public Material getImpostorMaterial() {
+        if( impostorMaterial != null ) {
+            return impostorMaterial;
+        }
+        
+        impostorMaterial = new Material(getApplication().getAssetManager(), "MatDefs/IndexedBillboardLighting.j3md");
+        impostorMaterial.setColor("Diffuse", ColorRGBA.White);
+        impostorMaterial.setColor("Ambient", ColorRGBA.White);
+        impostorMaterial.setBoolean("UseMaterialColors", true);
+        impostorMaterial.setFloat("AlphaDiscardThreshold", 0.5f);
+        
+        AssetManager assets = getApplication().getAssetManager();
+        Texture testTexture = assets.loadTexture("Textures/test-tree-atlas2.png");
+        //testTexture.setWrap(Texture.WrapMode.Repeat);
+        
+        impostorMaterial.setTexture("DiffuseMap", testTexture);            
+        impostorMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        impostorMaterial.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        return impostorMaterial;
+    }
     
-    protected Material createWireMaterial() {
+    public Material getWireMaterial() {
         if( wireMaterial != null ) {
             return wireMaterial;
         }
@@ -299,7 +322,7 @@ public class ForestGridState extends BaseAppState {
         return mat;
     }
     
-    protected Material createLeafMaterial() {
+    public Material getLeafMaterial() {
         if( leafMaterial != null ) {
             return leafMaterial;
         }

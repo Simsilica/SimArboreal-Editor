@@ -1,5 +1,5 @@
 /*
- * ${Id}
+ * $Id$
  *
  * Copyright (c) 2014, Simsilica, LLC
  * All rights reserved.
@@ -72,6 +72,7 @@ public class ForestGrid {
     private Material wireMaterial;
     private Material leafMaterial;
     private Material flatMaterial;
+    private Material impostorMaterial;
  
     private boolean showWireframe;
     private boolean showLeaves;
@@ -81,12 +82,14 @@ public class ForestGrid {
                        Material wireMaterial,
                        Material leafMaterial,
                        Material flatMaterial,
+                       Material impostorMaterial,
                        Builder builder ) {         
         this.treeParameters = treeParameters;
         this.treeMaterial = treeMaterial;
         this.wireMaterial = wireMaterial;
         this.leafMaterial = leafMaterial;                       
-        this.flatMaterial = flatMaterial;                       
+        this.flatMaterial = flatMaterial;
+        this.impostorMaterial = impostorMaterial;                       
         this.builder = builder;
         this.root = new Node("Forest"); 
         this.spacing = 5;
@@ -252,7 +255,8 @@ public class ForestGrid {
                                                            treeMaterial, 
                                                            wireMaterial, 
                                                            leafMaterial,
-                                                           flatMaterial);
+                                                           flatMaterial,
+                                                           impostorMaterial);
                     Node tree = trees[i][j].getTreeNode();
                     tree.setLocalTranslation(i * spacing, 0, j * spacing);
                     tree.setLocalScale(treeParameters.getBaseScale());

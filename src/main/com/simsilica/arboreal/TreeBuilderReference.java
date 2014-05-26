@@ -46,6 +46,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
+import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 import com.simsilica.arboreal.builder.BuilderReference;
 import com.simsilica.arboreal.mesh.BillboardedLeavesMeshGenerator;
@@ -76,6 +77,8 @@ public class TreeBuilderReference implements BuilderReference
     private Material leafMaterial;
     private Material flatMaterial;
     private Material flatWireMaterial;
+    private Material impostorMaterial;
+    private Material impostorWireMaterial;
     private TreeParameters treeParameters;
     
     private Node treeNode;
@@ -94,12 +97,14 @@ public class TreeBuilderReference implements BuilderReference
                                  Material treeMaterial, 
                                  Material wireMaterial,
                                  Material leafMaterial,
-                                 Material flatMaterial ) {
+                                 Material flatMaterial,
+                                 Material impostorMaterial ) {
         this.treeParameters = treeParameters;
         this.treeMaterial = treeMaterial;
         this.wireMaterial = wireMaterial;
         this.leafMaterial = leafMaterial;
         this.flatMaterial = flatMaterial;
+        this.impostorMaterial = impostorMaterial;
  
         lods = new LevelGeometry[treeParameters.getLodCount()];       
         treeNode = new Node("Tree");
@@ -111,6 +116,12 @@ public class TreeBuilderReference implements BuilderReference
         flatWireMaterial.setColor("Diffuse", ColorRGBA.Yellow.mult(10));
         flatWireMaterial.setColor("Ambient", ColorRGBA.Yellow.mult(10));
         flatWireMaterial.getAdditionalRenderState().setWireframe(true);
+        
+        impostorWireMaterial = impostorMaterial.clone();
+        impostorWireMaterial.clearParam("DiffuseMap");
+        impostorWireMaterial.setColor("Diffuse", ColorRGBA.Yellow.mult(10));
+        impostorWireMaterial.setColor("Ambient", ColorRGBA.Yellow.mult(10));
+        impostorWireMaterial.getAdditionalRenderState().setWireframe(true);
     }        
  
     public void setSeed( int seed ) {
@@ -291,6 +302,7 @@ public class TreeBuilderReference implements BuilderReference
  
             Mesh treeMesh = null;
             List<Vertex> tips = null;
+            boolean generateLeaves = false;
             
             switch( lodParms.reduction ) {
                 case Normal:                 
@@ -314,6 +326,8 @@ public class TreeBuilderReference implements BuilderReference
                     level.wireGeom = new Geometry("Tree Wire", treeMesh);
                     level.wireGeom.setMaterial(wireMaterial);
                     level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+                    
+                    generateLeaves = true;
                     break;
                 case FlatPoly:
                     FlatPolyTreeMeshGenerator polyGen = new FlatPolyTreeMeshGenerator();
@@ -335,12 +349,51 @@ public class TreeBuilderReference implements BuilderReference
                     level.wireGeom = new Geometry("Tree Wire", treeMesh);
                     level.wireGeom.setMaterial(flatWireMaterial);
                     level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
+                    
+                    generateLeaves = true;
                     break;
                 case Impostor:
+                
+                    // Just do it here raw for now
+                    Mesh mesh = new Mesh();
+                    mesh.setBuffer(Type.Position, 3, new float[] {
+                                0, -32f/255 * 4, 0,
+                                0, -32f/255 * 4, 0,
+                                0, 4, 0,
+                                0, 4, 0
+                            });
+                    mesh.setBuffer(Type.Size, 1, new float[] {
+                                -3,
+                                3, 
+                                -3,
+                                3
+                            });
+                    mesh.setBuffer(Type.TexCoord, 2, new float[] {
+                                0, 0,
+                                1, 0,
+                                0, 0.5f,
+                                1, 0.5f
+                            });
+                    mesh.setBuffer(Type.Index, 3, new int[] {
+                                0, 1, 3,
+                                0, 3, 2
+                            });
+                    mesh.updateBound();                            
+
+                    level.treeGeom = new Geometry("Tree", mesh);
+                    level.treeGeom.setMaterial(impostorMaterial);
+                    level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+                    level.treeGeom.setLocalTranslation(0, 0, 0);
+                    level.treeGeom.setQueueBucket(Bucket.Transparent);
+                    
+                    level.wireGeom = new Geometry("Tree Wire", mesh);
+                    level.wireGeom.setMaterial(impostorWireMaterial);
+                    level.wireGeom.setLocalTranslation(0, 0, 0);
+                
                     break;
             }
  
-            if( treeParameters.getGenerateLeaves() && baseTips != null ) {
+            if( generateLeaves && treeParameters.getGenerateLeaves() && baseTips != null ) {
                 BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
                 Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
                 level.leafGeom = new Geometry("Leaves", leafMesh);
