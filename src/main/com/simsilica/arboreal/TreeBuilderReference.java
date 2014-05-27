@@ -387,9 +387,6 @@ public class TreeBuilderReference implements BuilderReference
                         releaseMesh(leafMesh);
                     } 
  
-System.out.println( "trunk bounds:" + trunkBounds );
-System.out.println( "leaf bounds:" + leafBounds );                    
- 
                     float rootHeight = treeParameters.getRootHeight();
                     Vector3f min = trunkBounds.getMin(null);
                     Vector3f max = trunkBounds.getMax(null);
@@ -397,8 +394,7 @@ System.out.println( "leaf bounds:" + leafBounds );
                         min.minLocal(leafBounds.getMin(null));
                         max.maxLocal(leafBounds.getMax(null));
                     }
-System.out.println( "min:" + min + "  max:" + max );                    
-                    float radius = (max.y - min.y) * 0.5f; 
+                    //float radius = (max.y - min.y) * 0.5f; 
  
                     float xSize = Math.max(Math.abs(min.x), Math.abs(max.x));
                     float ySize = max.y - min.y;
@@ -407,7 +403,7 @@ System.out.println( "min:" + min + "  max:" + max );
                     float size = ySize * 0.5f;
                     size = Math.max(size, xSize);
                     size = Math.max(size, zSize);
-                    radius = size;
+                    float radius = size;
                 
                     // Just do it here raw for now
                     Mesh mesh = new Mesh();
@@ -416,6 +412,8 @@ System.out.println( "min:" + min + "  max:" + max );
                                 0, min.y + rootHeight, 0,
                                 0, min.y + (size*2) + rootHeight, 0,
                                 0, min.y + (size*2) + rootHeight, 0
+                                //0, max.y + rootHeight, 0,
+                                //0, max.y + rootHeight, 0
                             });
                     mesh.setBuffer(Type.Size, 1, new float[] {
                                 -radius,
@@ -444,7 +442,6 @@ System.out.println( "min:" + min + "  max:" + max );
                     level.wireGeom = new Geometry("Tree Wire", mesh);
                     level.wireGeom.setMaterial(impostorWireMaterial);
                     level.wireGeom.setLocalTranslation(0, 0, 0);
-System.out.println( "tree bounds:" + level.treeGeom.getWorldBound() );                
                     break;
             }
  

@@ -94,6 +94,8 @@ public class AtlasGeneratorState extends BaseAppState {
     private TreeView[] views = new TreeView[4];    
 
     private BitmapFont font;
+    
+    private boolean debugTextures = false;
 
     @Override
     protected void initialize( Application app ) {
@@ -117,8 +119,10 @@ public class AtlasGeneratorState extends BaseAppState {
         Texture2D fbTex = new Texture2D(1024, 512, Format.RGBA8);
         fb.setDepthBuffer(Format.Depth);
         fb.setColorTexture(fbTex);
-        
-        getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", fbTex);
+ 
+        if( !debugTextures ) {       
+            getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", fbTex);
+        }
         
         
         /*Quad testQuad = new Quad(1024, 512);
@@ -237,6 +241,7 @@ public class AtlasGeneratorState extends BaseAppState {
         Geometry leafGeom;
         Geometry wireBounds;
         boolean debugBounds = false;
+        boolean debugCell = false;
         
         public TreeView( FrameBuffer fb, Camera templateCamera, DirectionalLight sun, float angle, float x, float y ) {
         
@@ -247,16 +252,20 @@ public class AtlasGeneratorState extends BaseAppState {
             
             this.root = new Node("Root:" + x + ", " + y);
             this.viewport = getApplication().getRenderManager().createMainView("tree[" + x + ", " + y + "]", camera);
-            this.viewport.setOutputFrameBuffer(fb);
+            if( !debugTextures ) {
+                this.viewport.setOutputFrameBuffer(fb);
+            }
             this.root.rotate(0, -angle, 0);
  
-            BitmapText label = new BitmapText(font);
-            label.setText("u:" + x + "\na:" + angle);
-            label.setLocalScale(0.01f);
-            Quaternion labelRot = root.getLocalRotation().inverse(); 
-            label.setLocalRotation(labelRot);
-            label.setLocalTranslation(labelRot.mult(new Vector3f(0, 1, 2)));
-            root.attachChild(label);
+            if( debugCell ) {
+                BitmapText label = new BitmapText(font);
+                label.setText("u:" + x + "\na:" + angle);
+                label.setLocalScale(0.01f);
+                Quaternion labelRot = root.getLocalRotation().inverse(); 
+                label.setLocalRotation(labelRot);
+                label.setLocalTranslation(labelRot.mult(new Vector3f(0, 1, 2)));
+                root.attachChild(label);
+            }
             
             viewport.attachScene(root);
             root.addLight(sun);
@@ -308,8 +317,6 @@ public class AtlasGeneratorState extends BaseAppState {
             Vector3f min = bb.getMin(null);
             Vector3f max = bb.getMax(null);
  
-System.out.println( "bb:" + bb );
-System.out.println( "min:" + min + "  max:" + max ); 
             float xSize = Math.max(Math.abs(min.x), Math.abs(max.x));
             float ySize = max.y - min.y;
             float zSize = Math.max(Math.abs(min.z), Math.abs(max.z));
@@ -317,7 +324,6 @@ System.out.println( "min:" + min + "  max:" + max );
             float size = ySize * 0.5f;
             size = Math.max(size, xSize);
             size = Math.max(size, zSize);
-System.out.println( "size:" + size ); 
             
             //float size = bb.getYExtent();            
             //size = Math.max(size, bb.getXExtent());
@@ -339,8 +345,11 @@ System.out.println( "size:" + size );
             //z += offset;
         
             Vector3f center = bb.getCenter().add(trunkGeom.getLocalTranslation());
-        
-            camera.setLocation(new Vector3f(0, center.y, z));
+ 
+            float sizeOffset = size - (ySize*0.5f); 
+ 
+            Vector3f camLoc = new Vector3f(0, center.y + sizeOffset, z); 
+            camera.setLocation(camLoc);
  
             if( debugBounds ) {       
                 WireBox box;        
