@@ -37,12 +37,14 @@
 package com.simsilica.arboreal;
 
 import com.jme3.app.Application;
-import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingBox;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
@@ -53,7 +55,6 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.debug.WireBox;
-import com.jme3.scene.shape.Quad;
 import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.Image.Format;
 import com.jme3.texture.Texture2D;
@@ -92,6 +93,8 @@ public class AtlasGeneratorState extends BaseAppState {
     
     private TreeView[] views = new TreeView[4];    
 
+    private BitmapFont font;
+
     @Override
     protected void initialize( Application app ) {
  
@@ -102,6 +105,8 @@ public class AtlasGeneratorState extends BaseAppState {
         this.builder = getState(BuilderState.class).getBuilder();
         this.builderRef = new AtlasTreeBuilderReference();
         
+ 
+        this.font = GuiGlobals.getInstance().loadFont("Interface/Fonts/Default.fnt");
         
         Camera camera = app.getCamera().clone();   
         camera.resize(512, 512, true);
@@ -125,11 +130,16 @@ public class AtlasGeneratorState extends BaseAppState {
  
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(new ColorRGBA(1, 1, 1, 1));
-        sun.setDirection(new Vector3f(0, 0, -1));
+        sun.setDirection(new Vector3f(0, -1f, -1).normalizeLocal());
  
-        for( int i = 0; i < 4; i++ ) {
-            views[i] = new TreeView(fb, camera, sun, 0.25f * i, 0);
-        }
+        //-x * FastMath.TWO_PI - FastMath.QUARTER_PI
+        // The texture quads actually run a, c, d, b starting with
+        // the +, + quadrant
+        views[0] = new TreeView(fb, camera, sun, FastMath.QUARTER_PI, 0.25f * 0, 0);
+        views[1] = new TreeView(fb, camera, sun, -FastMath.QUARTER_PI, 0.25f * 1, 0);
+        views[2] = new TreeView(fb, camera, sun, FastMath.PI - FastMath.QUARTER_PI, 0.25f * 2, 0);
+        views[3] = new TreeView(fb, camera, sun, FastMath.PI + FastMath.QUARTER_PI, 0.25f * 3, 0);
+        
     }
 
     @Override
@@ -228,7 +238,7 @@ public class AtlasGeneratorState extends BaseAppState {
         Geometry wireBounds;
         boolean debugBounds = false;
         
-        public TreeView( FrameBuffer fb, Camera templateCamera, DirectionalLight sun, float x, float y ) {
+        public TreeView( FrameBuffer fb, Camera templateCamera, DirectionalLight sun, float angle, float x, float y ) {
         
             this.camera = templateCamera.clone();
             camera.resize(512, 512, true);
@@ -238,13 +248,22 @@ public class AtlasGeneratorState extends BaseAppState {
             this.root = new Node("Root:" + x + ", " + y);
             this.viewport = getApplication().getRenderManager().createMainView("tree[" + x + ", " + y + "]", camera);
             this.viewport.setOutputFrameBuffer(fb);
-            this.root.rotate(0, x * FastMath.TWO_PI + FastMath.QUARTER_PI, 0);
+            this.root.rotate(0, -angle, 0);
+ 
+            BitmapText label = new BitmapText(font);
+            label.setText("u:" + x + "\na:" + angle);
+            label.setLocalScale(0.01f);
+            Quaternion labelRot = root.getLocalRotation().inverse(); 
+            label.setLocalRotation(labelRot);
+            label.setLocalTranslation(labelRot.mult(new Vector3f(0, 1, 2)));
+            root.attachChild(label);
             
             viewport.attachScene(root);
             root.addLight(sun);
             
             viewport.setClearFlags(true, true, true);
             viewport.setBackgroundColor(new ColorRGBA(0, 0, 0, 0));
+            //viewport.setBackgroundColor(new ColorRGBA(0.5f, 0.5f, 1, 0));
             this.camera.lookAtDirection(new Vector3f(0, 0, -1), Vector3f.UNIT_Y);
         }
         
@@ -285,7 +304,24 @@ public class AtlasGeneratorState extends BaseAppState {
                 BoundingBox bb2 = (BoundingBox)leafGeom.getModelBound();
                 bb = (BoundingBox)bb.merge(bb2);
             }
-            float size = bb.getYExtent();
+            
+            Vector3f min = bb.getMin(null);
+            Vector3f max = bb.getMax(null);
+ 
+System.out.println( "bb:" + bb );
+System.out.println( "min:" + min + "  max:" + max ); 
+            float xSize = Math.max(Math.abs(min.x), Math.abs(max.x));
+            float ySize = max.y - min.y;
+            float zSize = Math.max(Math.abs(min.z), Math.abs(max.z));
+ 
+            float size = ySize * 0.5f;
+            size = Math.max(size, xSize);
+            size = Math.max(size, zSize);
+System.out.println( "size:" + size ); 
+            
+            //float size = bb.getYExtent();            
+            //size = Math.max(size, bb.getXExtent());
+            //size = Math.max(size, bb.getZExtent());
     
             // In the projection matrix, [1][1] should be:
             //      (2 * Zn) / camHeight
@@ -300,7 +336,7 @@ public class AtlasGeneratorState extends BaseAppState {
             // of the bounding box... well we will be rotating so
             // let's just be sure and take the max of x and z
             float offset = Math.max(bb.getXExtent(), bb.getZExtent());
-            z += offset;
+            //z += offset;
         
             Vector3f center = bb.getCenter().add(trunkGeom.getLocalTranslation());
         

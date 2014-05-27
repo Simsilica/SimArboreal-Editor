@@ -37,8 +37,10 @@
 package com.simsilica.arboreal;
 
 
+import com.jme3.bounding.BoundingBox;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
@@ -275,7 +277,10 @@ public class TreeBuilderReference implements BuilderReference
         geom.removeFromParent();
         
         Mesh mesh = geom.getMesh();
-                           
+        releaseMesh(mesh);                           
+    }
+ 
+    protected void releaseMesh( Mesh mesh ) {
         // Delete the old buffers
         for( VertexBuffer vb : mesh.getBufferList() ) {
             if( log.isTraceEnabled() ) {
@@ -291,6 +296,9 @@ public class TreeBuilderReference implements BuilderReference
 
         TreeGenerator treeGen = new TreeGenerator();        
         Tree tree = treeGen.generateTree(seed, treeParameters);
+ 
+        BoundingBox trunkBounds = null;
+        BoundingBox leafBounds = null;
  
         List<Vertex> baseTips = null;
  
@@ -317,7 +325,8 @@ public class TreeBuilderReference implements BuilderReference
                                                     treeParameters.getTextureURepeat(),
                                                     treeParameters.getTextureVScale(),
                                                     tips);
-                                                        
+                    trunkBounds = (BoundingBox)treeMesh.getBound();
+ 
                     level.treeGeom = new Geometry("Tree", treeMesh);
                     level.treeGeom.setMaterial(treeMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
@@ -353,20 +362,66 @@ public class TreeBuilderReference implements BuilderReference
                     generateLeaves = true;
                     break;
                 case Impostor:
+ 
+                    if( trunkBounds == null ) {
+                        // Generate the mesh just to throw it away
+                        meshGen = new SkinnedTreeMeshGenerator();
+        
+                        if( baseTips == null ) {
+                            baseTips = tips = new ArrayList<Vertex>();
+                        }
+                        treeMesh = meshGen.generateMesh(tree,
+                                                        treeParameters.getLod(0),
+                                                        treeParameters.getYOffset(), 
+                                                        treeParameters.getTextureURepeat(),
+                                                        treeParameters.getTextureVScale(),
+                                                        tips);
+                        trunkBounds = (BoundingBox)treeMesh.getBound();
+                        releaseMesh(treeMesh);
+                    }
+                    
+                    if( leafBounds == null && treeParameters.getGenerateLeaves() ) {
+                        BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
+                        Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
+                        leafBounds = (BoundingBox)leafMesh.getBound();
+                        releaseMesh(leafMesh);
+                    } 
+ 
+System.out.println( "trunk bounds:" + trunkBounds );
+System.out.println( "leaf bounds:" + leafBounds );                    
+ 
+                    float rootHeight = treeParameters.getRootHeight();
+                    Vector3f min = trunkBounds.getMin(null);
+                    Vector3f max = trunkBounds.getMax(null);
+                    if( leafBounds != null ) {
+                        min.minLocal(leafBounds.getMin(null));
+                        max.maxLocal(leafBounds.getMax(null));
+                    }
+System.out.println( "min:" + min + "  max:" + max );                    
+                    float radius = (max.y - min.y) * 0.5f; 
+ 
+                    float xSize = Math.max(Math.abs(min.x), Math.abs(max.x));
+                    float ySize = max.y - min.y;
+                    float zSize = Math.max(Math.abs(min.z), Math.abs(max.z));
+ 
+                    float size = ySize * 0.5f;
+                    size = Math.max(size, xSize);
+                    size = Math.max(size, zSize);
+                    radius = size;
                 
                     // Just do it here raw for now
                     Mesh mesh = new Mesh();
                     mesh.setBuffer(Type.Position, 3, new float[] {
-                                0, -32f/255 * 4, 0,
-                                0, -32f/255 * 4, 0,
-                                0, 4, 0,
-                                0, 4, 0
+                                0, min.y + rootHeight, 0,
+                                0, min.y + rootHeight, 0,
+                                0, min.y + (size*2) + rootHeight, 0,
+                                0, min.y + (size*2) + rootHeight, 0
                             });
                     mesh.setBuffer(Type.Size, 1, new float[] {
-                                -3,
-                                3, 
-                                -3,
-                                3
+                                -radius,
+                                radius, 
+                                -radius,
+                                radius
                             });
                     mesh.setBuffer(Type.TexCoord, 2, new float[] {
                                 0, 0,
@@ -389,13 +444,14 @@ public class TreeBuilderReference implements BuilderReference
                     level.wireGeom = new Geometry("Tree Wire", mesh);
                     level.wireGeom.setMaterial(impostorWireMaterial);
                     level.wireGeom.setLocalTranslation(0, 0, 0);
-                
+System.out.println( "tree bounds:" + level.treeGeom.getWorldBound() );                
                     break;
             }
  
             if( generateLeaves && treeParameters.getGenerateLeaves() && baseTips != null ) {
                 BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
                 Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
+                leafBounds = (BoundingBox)leafMesh.getBound();
                 level.leafGeom = new Geometry("Leaves", leafMesh);
                 level.leafGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);  
                 level.leafGeom.setQueueBucket(Bucket.Transparent);  
