@@ -54,7 +54,8 @@ import com.simsilica.lemur.event.BaseAppState;
 public class PostProcessorState extends BaseAppState {
 
     private FilterPostProcessor fpp;
-    private DirectionalLightShadowFilter shadows;
+    private DirectionalLightShadowFilter shadows1;
+    private DropShadowFilter shadows2;
     private VersionedReference<Vector3f> lightDir;
     private float shadowStrength = 0.3f;
 
@@ -62,7 +63,7 @@ public class PostProcessorState extends BaseAppState {
     }
 
     public void setEnableShadows( boolean b ) {
-        shadows.setEnabled(b);
+        shadows1.setEnabled(b);
     }
     
     public void setShadowStrength( float f ) {
@@ -78,7 +79,7 @@ public class PostProcessorState extends BaseAppState {
     }
 
     protected void resetShadowStrength() {
-        shadows.setShadowIntensity(shadowStrength);
+        shadows1.setShadowIntensity(shadowStrength);
     }
 
     @Override
@@ -95,11 +96,15 @@ public class PostProcessorState extends BaseAppState {
             fpp.setNumSamples(settings.getSamples());
             }
 
-        shadows = new DirectionalLightShadowFilter(assets, 4096, 4);
-        shadows.setShadowIntensity(0.3f);
-        shadows.setLight(getState(LightingState.class).getSun());
-        shadows.setEnabled(false);
-        fpp.addFilter(shadows);
+        shadows1 = new DirectionalLightShadowFilter(assets, 4096, 4);
+        shadows1.setShadowIntensity(0.3f);
+        shadows1.setLight(getState(LightingState.class).getSun());
+        shadows1.setEnabled(false);
+        fpp.addFilter(shadows1);
+
+        shadows2 = new DropShadowFilter();
+        shadows2.setEnabled(false);
+        fpp.addFilter(shadows2);
         
         // Go ahead and add some UI stuff here... normally I'd
         // put it in another state but it doesn't seem worth it.

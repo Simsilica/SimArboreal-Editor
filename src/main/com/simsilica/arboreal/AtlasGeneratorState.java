@@ -40,6 +40,7 @@ import com.jme3.app.Application;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -55,6 +56,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.debug.WireBox;
+import com.jme3.scene.shape.Quad;
 import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.Image.Format;
 import com.jme3.texture.Texture2D;
@@ -91,11 +93,14 @@ public class AtlasGeneratorState extends BaseAppState {
     private Mesh trunkMesh;
     private Mesh leafMesh;
     
-    private TreeView[] views = new TreeView[4];    
+    private TreeView[] treeViews = new TreeView[4];    
+    private LeafView[] leafViews = new LeafView[4];    
 
     private BitmapFont font;
     
     private boolean debugTextures = false;
+    
+    private boolean useNormalMaps = true;
 
     @Override
     protected void initialize( Application app ) {
@@ -111,44 +116,76 @@ public class AtlasGeneratorState extends BaseAppState {
         this.font = GuiGlobals.getInstance().loadFont("Interface/Fonts/Default.fnt");
         
         Camera camera = app.getCamera().clone();   
-        camera.resize(512, 512, true);
-        camera.resize(1024, 512, false);
+        camera.resize(256, 256, true);
+        camera.resize(1024, 256, false);
   
  
-        FrameBuffer fb = new FrameBuffer(1024, 512, 1);
-        Texture2D fbTex = new Texture2D(1024, 512, Format.RGBA8);
-        fb.setDepthBuffer(Format.Depth);
-        fb.setColorTexture(fbTex);
- 
-        if( !debugTextures ) {       
-            getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", fbTex);
+        FrameBuffer fb1 = new FrameBuffer(1024, 256, 1);
+        Texture2D fbTex1 = new Texture2D(1024, 256, Format.RGBA8);
+        fb1.setDepthBuffer(Format.Depth);
+        fb1.setColorTexture(fbTex1);
+        getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", fbTex1);
+    
+        FrameBuffer fb2 = new FrameBuffer(1024, 256, 1);
+        Texture2D fbTex2 = new Texture2D(1024, 256, Format.RGBA8);
+        fb2.setDepthBuffer(Format.Depth);
+        fb2.setColorTexture(fbTex2); 
+        
+        if( useNormalMaps ) {
+            getState(ForestGridState.class).getImpostorMaterial().setTexture("NormalMap", fbTex2);
         }
         
-        
-        /*Quad testQuad = new Quad(1024, 512);
-        Geometry testGeom = new Geometry("test", testQuad);
-        Material mat = GuiGlobals.getInstance().createMaterial(fbTex, false).getMaterial();
-        testGeom.setMaterial(mat);
-        ((TreeEditor)app).getGuiNode().attachChild(testGeom);*/
-        
+ 
+        if( debugTextures ) {       
+            Quad testQuad = new Quad(1024, 256);
+            Geometry testGeom = new Geometry("test", testQuad);
+            Material mat = GuiGlobals.getInstance().createMaterial(fbTex1, false).getMaterial();
+            testGeom.setMaterial(mat);
+            ((TreeEditor)app).getGuiNode().attachChild(testGeom);
+            
+            testQuad = new Quad(1024, 256);
+            testGeom = new Geometry("test", testQuad);
+            testGeom.setLocalTranslation(0, 256, 0);
+            mat = GuiGlobals.getInstance().createMaterial(fbTex2, false).getMaterial();
+            testGeom.setMaterial(mat);
+            ((TreeEditor)app).getGuiNode().attachChild(testGeom);
+        }
  
         DirectionalLight sun = new DirectionalLight();
-        sun.setColor(new ColorRGBA(1, 1, 1, 1));
-        sun.setDirection(new Vector3f(0, -1f, -1).normalizeLocal());
+        //sun.setDirection(new Vector3f(0, -1f, -1).normalizeLocal());
+        sun.setDirection(new Vector3f(0, 0, -1).normalizeLocal());
+ 
+        AmbientLight ambient = new AmbientLight();
+
+        if( useNormalMaps ) {
+            sun.setColor(new ColorRGBA(0.5f, 0.5f, 0.5f, 1));
+            ambient.setColor(new ColorRGBA(0.5f, 0.5f, 0.5f, 1));
+        } else {
+            sun.setColor(new ColorRGBA(1, 1, 1, 1));
+            ambient.setColor(new ColorRGBA(0.25f, 0.25f, 0.25f, 1));            
+        }
  
         //-x * FastMath.TWO_PI - FastMath.QUARTER_PI
         // The texture quads actually run a, c, d, b starting with
         // the +, + quadrant
-        views[0] = new TreeView(fb, camera, sun, FastMath.QUARTER_PI, 0.25f * 0, 0);
-        views[1] = new TreeView(fb, camera, sun, -FastMath.QUARTER_PI, 0.25f * 1, 0);
-        views[2] = new TreeView(fb, camera, sun, FastMath.PI - FastMath.QUARTER_PI, 0.25f * 2, 0);
-        views[3] = new TreeView(fb, camera, sun, FastMath.PI + FastMath.QUARTER_PI, 0.25f * 3, 0);
+        treeViews[0] = new TreeView(fb1, camera, sun, ambient, FastMath.QUARTER_PI, 0.25f * 0, 0);
+        treeViews[1] = new TreeView(fb1, camera, sun, ambient, -FastMath.QUARTER_PI, 0.25f * 1, 0);
+        treeViews[2] = new TreeView(fb1, camera, sun, ambient, FastMath.PI - FastMath.QUARTER_PI, 0.25f * 2, 0);
+        treeViews[3] = new TreeView(fb1, camera, sun, ambient, FastMath.PI + FastMath.QUARTER_PI, 0.25f * 3, 0);
+        
+        leafViews[0] = new LeafView(fb2, camera, sun, FastMath.QUARTER_PI, 0.25f * 0, 0);
+        leafViews[1] = new LeafView(fb2, camera, sun, -FastMath.QUARTER_PI, 0.25f * 1, 0);
+        leafViews[2] = new LeafView(fb2, camera, sun, FastMath.PI - FastMath.QUARTER_PI, 0.25f * 2, 0);
+        leafViews[3] = new LeafView(fb2, camera, sun, FastMath.PI + FastMath.QUARTER_PI, 0.25f * 3, 0);
         
     }
 
     @Override
     protected void cleanup( Application app ) {
-        for( TreeView view : views ) {
+        for( TreeView view : treeViews ) {
+            app.getRenderManager().removeMainView(view.viewport);
+        }
+        for( LeafView view : leafViews ) {
             app.getRenderManager().removeMainView(view.viewport);
         }
     }
@@ -171,7 +208,12 @@ public class AtlasGeneratorState extends BaseAppState {
         this.trunkMesh = trunkMesh;
         this.leafMesh = leafMesh;
         
-        for( TreeView view : views ) {
+        for( TreeView view : treeViews ) {
+            if( view != null ) {
+                view.updateMesh(trunkMesh, leafMesh);
+            }
+        }
+        for( LeafView view : leafViews ) {
             if( view != null ) {
                 view.updateMesh(trunkMesh, leafMesh);
             }
@@ -211,7 +253,7 @@ public class AtlasGeneratorState extends BaseAppState {
         
         /**
          for bounds debugging
-        for( TreeView view : views ) {
+        for( TreeView view : treeViews ) {
             view.root.rotate(0, tpf, 0);
         }
         */                
@@ -219,12 +261,18 @@ public class AtlasGeneratorState extends BaseAppState {
 
     @Override
     public void render( RenderManager rm ) {
-        if( views != null ) {
+        if( treeViews != null ) {
             // We update the logical state here because it is
             // done after the other updates.  So if another app
             // state or control has modified our root then we
             // are guaranteed to run after.
-            for( TreeView view : views ) {
+            for( TreeView view : treeViews ) {
+                if( view != null ) {
+                    view.root.updateLogicalState(lastTpf);
+                    view.root.updateGeometricState();
+                }               
+            }
+            for( LeafView view : leafViews ) {
                 if( view != null ) {
                     view.root.updateLogicalState(lastTpf);
                     view.root.updateGeometricState();
@@ -243,7 +291,7 @@ public class AtlasGeneratorState extends BaseAppState {
         boolean debugBounds = false;
         boolean debugCell = false;
         
-        public TreeView( FrameBuffer fb, Camera templateCamera, DirectionalLight sun, float angle, float x, float y ) {
+        public TreeView( FrameBuffer fb, Camera templateCamera, DirectionalLight sun, AmbientLight ambient, float angle, float x, float y ) {
         
             this.camera = templateCamera.clone();
             camera.resize(512, 512, true);
@@ -252,9 +300,7 @@ public class AtlasGeneratorState extends BaseAppState {
             
             this.root = new Node("Root:" + x + ", " + y);
             this.viewport = getApplication().getRenderManager().createMainView("tree[" + x + ", " + y + "]", camera);
-            if( !debugTextures ) {
-                this.viewport.setOutputFrameBuffer(fb);
-            }
+            this.viewport.setOutputFrameBuffer(fb);
             this.root.rotate(0, -angle, 0);
  
             if( debugCell ) {
@@ -269,6 +315,7 @@ public class AtlasGeneratorState extends BaseAppState {
             
             viewport.attachScene(root);
             root.addLight(sun);
+            root.addLight(ambient);
             
             viewport.setClearFlags(true, true, true);
             viewport.setBackgroundColor(new ColorRGBA(0, 0, 0, 0));
@@ -367,6 +414,156 @@ public class AtlasGeneratorState extends BaseAppState {
                 wireBounds.setLocalTranslation(bb.getCenter());
                 wireBounds.move(trunkGeom.getLocalTranslation());
                 wireBounds.setLocalRotation(trunkGeom.getLocalRotation());
+            }        
+        }
+
+    }
+
+
+    private class LeafView {
+        ViewPort viewport;
+        Camera camera;
+        Node root;
+        Mesh leafMesh;
+        Mesh trunkMesh;
+        Geometry trunkGeom;
+        Geometry leafGeom;
+        Geometry wireBounds;
+        boolean debugBounds = false;
+        boolean debugCell = false;
+        
+        public LeafView( FrameBuffer fb, Camera templateCamera, DirectionalLight sun, float angle, float x, float y ) {
+        
+            this.camera = templateCamera.clone();
+            camera.resize(512, 512, true);
+            camera.resize(1024, 512, false);
+            camera.setViewPort(x, x + 0.25f, y, y + 0.5f);
+            
+            this.root = new Node("Root:" + x + ", " + y);
+            this.viewport = getApplication().getRenderManager().createMainView("tree[" + x + ", " + y + "]", camera);
+            this.viewport.setOutputFrameBuffer(fb);
+            this.root.rotate(0, -angle, 0);
+ 
+            if( debugCell ) {
+                BitmapText label = new BitmapText(font);
+                label.setText("u:" + x + "\na:" + angle);
+                label.setLocalScale(0.01f);
+                Quaternion labelRot = root.getLocalRotation().inverse(); 
+                label.setLocalRotation(labelRot);
+                label.setLocalTranslation(labelRot.mult(new Vector3f(0, 1, 2)));
+                root.attachChild(label);
+            }
+            
+            viewport.attachScene(root);
+            root.addLight(sun);
+            
+            viewport.setClearFlags(true, true, true);
+            viewport.setBackgroundColor(new ColorRGBA(0, 0, 0, 0));
+            //viewport.setBackgroundColor(new ColorRGBA(0.5f, 0.5f, 1, 0));
+            this.camera.lookAtDirection(new Vector3f(0, 0, -1), Vector3f.UNIT_Y);
+        }
+        
+        public void updateMesh( Mesh trunkMesh, Mesh leafMesh ) {
+            if( trunkGeom == null ) {
+                // Create it
+                trunkGeom = new Geometry("Trunk", trunkMesh);
+                
+                Material normalMaterial = treeMaterial.clone();
+                normalMaterial.selectTechnique("PreNormalPass", getApplication().getRenderManager());
+                
+                trunkGeom.setMaterial(normalMaterial);
+                root.attachChild(trunkGeom);
+            } else {
+                // Just swap out the mesh
+                trunkGeom.setMesh(trunkMesh);
+            }
+            this.trunkMesh = trunkMesh;
+            this.leafMesh = leafMesh;
+            if( leafMesh == null ) {
+                if( leafGeom != null ) {
+                    leafGeom.removeFromParent();
+                    leafGeom = null;
+                }
+            } else {            
+                if( leafGeom == null ) {
+                    // Create it
+                    leafGeom = new Geometry("Leaves", leafMesh);
+                    
+                    Material normalMaterial = leafMaterial.clone();
+                    normalMaterial.selectTechnique("PreNormalPass", getApplication().getRenderManager());
+                    
+                    leafGeom.setMaterial(normalMaterial);
+                    leafGeom.setQueueBucket(Bucket.Transparent);  
+                    root.attachChild(leafGeom); 
+                } else {
+                    // Just swap out the mesh
+                    leafGeom.setMesh(leafMesh);
+                }
+            }                
+            updateCamera();
+        }
+        
+        protected void updateCamera() {
+ 
+            BoundingBox bb = (BoundingBox)trunkMesh.getBound();
+            if( leafGeom != null ) {
+                BoundingBox bb2 = (BoundingBox)leafMesh.getBound();
+                bb = (BoundingBox)bb.merge(bb2);
+            }
+            
+            Vector3f min = bb.getMin(null);
+            Vector3f max = bb.getMax(null);
+ 
+            float xSize = Math.max(Math.abs(min.x), Math.abs(max.x));
+            float ySize = max.y - min.y;
+            float zSize = Math.max(Math.abs(min.z), Math.abs(max.z));
+ 
+            float size = ySize * 0.5f;
+            size = Math.max(size, xSize);
+            size = Math.max(size, zSize);
+            
+            //float size = bb.getYExtent();            
+            //size = Math.max(size, bb.getXExtent());
+            //size = Math.max(size, bb.getZExtent());
+    
+            // In the projection matrix, [1][1] should be:
+            //      (2 * Zn) / camHeight
+            // where Zn is distance to near plane.
+            float m11 = camera.getViewProjectionMatrix().m11;
+
+            // We want our position to be such that
+            // 'size' is otherwise = cameraHeight when rendered.
+            float z = m11 * size;
+        
+            // Add the z extents so that we adjust for the near plane
+            // of the bounding box... well we will be rotating so
+            // let's just be sure and take the max of x and z
+            float offset = Math.max(bb.getXExtent(), bb.getZExtent());
+            //z += offset;
+        
+            Vector3f center = bb.getCenter();
+ 
+            float sizeOffset = size - (ySize*0.5f); 
+ 
+            Vector3f camLoc = new Vector3f(0, center.y + sizeOffset, z); 
+            camera.setLocation(camLoc);
+ 
+            if( debugBounds ) {       
+                WireBox box;        
+                if( wireBounds == null ) {
+                    box = new WireBox();
+                    wireBounds = new Geometry("wire box", box);
+                    Material mat = GuiGlobals.getInstance().createMaterial(ColorRGBA.Yellow, false).getMaterial();
+                    wireBounds.setMaterial(mat);
+                    root.attachChild(wireBounds);
+                } else {
+                    box = (WireBox)wireBounds.getMesh();
+                }
+                box.updatePositions(bb.getXExtent(), bb.getYExtent(), bb.getZExtent());
+                box.setBound(new BoundingBox(new Vector3f(0,0,0), 0, 0, 0));
+                wireBounds.setLocalTranslation(bb.getCenter());
+                //wireBounds.move(trunkGeom.getLocalTranslation());
+                wireBounds.setLocalRotation(leafGeom.getLocalRotation());
             }        
         }
 

@@ -424,8 +424,8 @@ public class TreeBuilderReference implements BuilderReference
                     mesh.setBuffer(Type.TexCoord, 2, new float[] {
                                 0, 0,
                                 1, 0,
-                                0, 0.5f,
-                                1, 0.5f
+                                0, 1f,
+                                1, 1f
                             });
                     mesh.setBuffer(Type.Index, 3, new int[] {
                                 0, 1, 3,
