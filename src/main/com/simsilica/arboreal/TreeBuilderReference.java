@@ -299,6 +299,7 @@ public class TreeBuilderReference implements BuilderReference
  
         BoundingBox trunkBounds = null;
         BoundingBox leafBounds = null;
+        BoundingBox impostorBounds = null;                    
  
         List<Vertex> baseTips = null;
  
@@ -331,7 +332,7 @@ public class TreeBuilderReference implements BuilderReference
                     level.treeGeom.setMaterial(treeMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
                     level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
-                    
+
                     level.wireGeom = new Geometry("wire:" + lodParms.reduction, treeMesh);
                     level.wireGeom.setMaterial(wireMaterial);
                     level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
@@ -379,13 +380,16 @@ public class TreeBuilderReference implements BuilderReference
                         trunkBounds = (BoundingBox)treeMesh.getBound();
                         releaseMesh(treeMesh);
                     }
+                    impostorBounds = (BoundingBox)trunkBounds.clone();
                     
                     if( leafBounds == null && treeParameters.getGenerateLeaves() ) {
                         BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
                         Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
                         leafBounds = (BoundingBox)leafMesh.getBound();
                         releaseMesh(leafMesh);
-                    } 
+                    } else if( treeParameters.getGenerateLeaves() ) {
+                        impostorBounds.mergeLocal(leafBounds);
+                    }  
  
                     float rootHeight = treeParameters.getRootHeight();
                     Vector3f min = trunkBounds.getMin(null);
@@ -431,7 +435,12 @@ public class TreeBuilderReference implements BuilderReference
                                 0, 1, 3,
                                 0, 3, 2
                             });
-                    mesh.updateBound();                            
+                    //mesh.updateBound();
+                    
+                    // Give the mesh the same bound that the real tree would have
+                    // had.
+                    impostorBounds.getCenter().addLocal(0, treeParameters.getRootHeight(), 0); 
+                    mesh.setBound(impostorBounds);                                                
 
                     level.treeGeom = new Geometry("tree:" + lodParms.reduction, mesh);
                     level.treeGeom.setMaterial(impostorMaterial);

@@ -181,7 +181,7 @@ public class DropShadowFilter extends Filter {
 
     @Override
     protected void postFrame( RenderManager renderManager, ViewPort viewPort, FrameBuffer prevFilterBuffer, FrameBuffer sceneBuffer ) {
-    
+ 
         RenderQueue rq = viewPort.getQueue();
         GeometryList casters = rq.getShadowQueueContent(ShadowMode.Cast);
         if( casters.size() == 0 )
@@ -239,7 +239,7 @@ public class DropShadowFilter extends Filter {
             // in many cases and will produce better shadows for oblong
             // objects than a simple round radius would.
             BoundingBox bounds = (BoundingBox)g.getModelBound();
-
+            
             float scale = g.getWorldScale().x;
             float xEx = bounds.getXExtent() * scale;
             float yEx = bounds.getYExtent() * scale;
