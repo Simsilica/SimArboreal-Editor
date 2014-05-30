@@ -38,6 +38,9 @@ package com.simsilica.arboreal;
 
 import com.jme3.app.Application;
 import com.jme3.export.binary.BinaryExporter;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.SceneGraphVisitorAdapter;
+import com.jme3.scene.Spatial;
 import com.jme3.system.JmeSystem;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -101,6 +104,25 @@ public class FileActionsState extends BaseAppState {
 
     @Override
     protected void disable() {
+    }
+ 
+    /**
+     *  Filters out the stuff that we probably don't want to... or
+     *  really shouldn't be saving in a j3o.  We should also remove
+     *  the Impostor LODs at least until there is a way to save and/or
+     *  embed the impostor image... but I don't right now.
+     */
+    protected Spatial filterClone( Spatial tree ) {
+        Spatial result = tree.deepClone();
+        result.depthFirstTraversal(new SceneGraphVisitorAdapter() {
+                @Override
+                public void visit( Geometry g ) {
+                    if( g.getName().startsWith("wire:") ) {
+                        g.removeFromParent();
+                    }
+                }
+            });                                            
+        return result;
     }
  
     private Map<String, File> lastRoots = new HashMap<String, File>();
@@ -218,7 +240,7 @@ public class FileActionsState extends BaseAppState {
             BinaryExporter exporter = BinaryExporter.getInstance();
             try {
                 System.out.println( "Writing:" + f );
-                exporter.save(getState(ForestGridState.class).getMainTreeNode(), f);
+                exporter.save(filterClone(getState(ForestGridState.class).getMainTreeNode()), f);
             } catch( IOException e ) {
                 log.error( "Error saving tree", e );
             }

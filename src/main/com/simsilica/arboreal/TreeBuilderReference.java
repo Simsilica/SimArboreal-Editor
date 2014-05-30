@@ -327,12 +327,12 @@ public class TreeBuilderReference implements BuilderReference
                                                     tips);
                     trunkBounds = (BoundingBox)treeMesh.getBound();
  
-                    level.treeGeom = new Geometry("Tree", treeMesh);
+                    level.treeGeom = new Geometry("tree:" + lodParms.reduction, treeMesh);
                     level.treeGeom.setMaterial(treeMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
                     level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
                     
-                    level.wireGeom = new Geometry("Tree Wire", treeMesh);
+                    level.wireGeom = new Geometry("wire:" + lodParms.reduction, treeMesh);
                     level.wireGeom.setMaterial(wireMaterial);
                     level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
                     
@@ -350,12 +350,12 @@ public class TreeBuilderReference implements BuilderReference
                                                     treeParameters.getTextureVScale(),
                                                     tips);
 
-                    level.treeGeom = new Geometry("Tree", treeMesh);
+                    level.treeGeom = new Geometry("tree:" + lodParms.reduction, treeMesh);
                     level.treeGeom.setMaterial(flatMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
                     level.treeGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
                                     
-                    level.wireGeom = new Geometry("Tree Wire", treeMesh);
+                    level.wireGeom = new Geometry("wire:" + lodParms.reduction, treeMesh);
                     level.wireGeom.setMaterial(flatWireMaterial);
                     level.wireGeom.setLocalTranslation(0, treeParameters.getRootHeight(), 0);
                     
@@ -433,13 +433,13 @@ public class TreeBuilderReference implements BuilderReference
                             });
                     mesh.updateBound();                            
 
-                    level.treeGeom = new Geometry("Tree", mesh);
+                    level.treeGeom = new Geometry("tree:" + lodParms.reduction, mesh);
                     level.treeGeom.setMaterial(impostorMaterial);
                     level.treeGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
                     level.treeGeom.setLocalTranslation(0, 0, 0);
                     level.treeGeom.setQueueBucket(Bucket.Transparent);
                     
-                    level.wireGeom = new Geometry("Tree Wire", mesh);
+                    level.wireGeom = new Geometry("wire:" + lodParms.reduction, mesh);
                     level.wireGeom.setMaterial(impostorWireMaterial);
                     level.wireGeom.setLocalTranslation(0, 0, 0);
                     break;
@@ -449,7 +449,7 @@ public class TreeBuilderReference implements BuilderReference
                 BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
                 Mesh leafMesh = leafGen.generateMesh(baseTips, treeParameters.getLeafScale());
                 leafBounds = (BoundingBox)leafMesh.getBound();
-                level.leafGeom = new Geometry("Leaves", leafMesh);
+                level.leafGeom = new Geometry("leaves:" + lodParms.reduction, leafMesh);
                 level.leafGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);  
                 level.leafGeom.setQueueBucket(Bucket.Transparent);  
                 level.leafGeom.setMaterial(leafMaterial);  
