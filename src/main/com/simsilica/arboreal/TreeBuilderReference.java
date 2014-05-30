@@ -299,7 +299,6 @@ public class TreeBuilderReference implements BuilderReference
  
         BoundingBox trunkBounds = null;
         BoundingBox leafBounds = null;
-        BoundingBox impostorBounds = null;                    
  
         List<Vertex> baseTips = null;
  
@@ -309,7 +308,7 @@ public class TreeBuilderReference implements BuilderReference
             LevelGeometry level = new LevelGeometry(lodParms.distance);
             levels[i] = level;
  
-            Mesh treeMesh = null;
+            Mesh treeMesh;
             List<Vertex> tips = null;
             boolean generateLeaves = false;
             
@@ -380,7 +379,7 @@ public class TreeBuilderReference implements BuilderReference
                         trunkBounds = (BoundingBox)treeMesh.getBound();
                         releaseMesh(treeMesh);
                     }
-                    impostorBounds = (BoundingBox)trunkBounds.clone();
+                    BoundingBox impostorBounds = (BoundingBox)trunkBounds.clone();
                     
                     if( leafBounds == null && treeParameters.getGenerateLeaves() ) {
                         BillboardedLeavesMeshGenerator leafGen = new BillboardedLeavesMeshGenerator();
