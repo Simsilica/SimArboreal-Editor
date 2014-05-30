@@ -67,8 +67,8 @@ import java.nio.ShortBuffer;
  *
  *  @author    Paul Speed
  */
-public class DropShadowFilter extends Filter
-{
+public class DropShadowFilter extends Filter {
+
     private static final int VERTS_PER_SHADOW = 8; // one per box corner
     private static final int TRIS_PER_SHADOW = 12; // two per face
     private static final int INDEXES_PER_SHADOW = TRIS_PER_SHADOW * 3;
@@ -112,13 +112,11 @@ public class DropShadowFilter extends Filter
     private VertexBuffer vbTexCoord2;
     private VertexBuffer vbIndex;
 
-    public DropShadowFilter()
-    {
+    public DropShadowFilter() {
         this(500);
     }
 
-    public DropShadowFilter( int maxShadows )
-    {
+    public DropShadowFilter( int maxShadows ) {
         this.maxShadows = maxShadows;
     }
 
@@ -131,14 +129,13 @@ public class DropShadowFilter extends Filter
     }    
 
     @Override
-    protected boolean isRequiresDepthTexture()
-    {
+    protected boolean isRequiresDepthTexture() {
         return true;
     }
 
     @Override
-    protected void initFilter(AssetManager assets, RenderManager rm, ViewPort vp, int w, int h)
-    {
+    protected void initFilter(AssetManager assets, RenderManager rm, ViewPort vp, int w, int h) {
+    
         // Cheating... side effect of being lazy and using a filter
         // without actually needing to filter anything.
         material = new Material( assets, "MatDefs/Null.j3md" );
@@ -178,14 +175,13 @@ public class DropShadowFilter extends Filter
     }
 
     @Override
-    protected Material getMaterial()
-    {
+    protected Material getMaterial() {
         return material;
     }
 
     @Override
-    protected void postFrame( RenderManager renderManager, ViewPort viewPort, FrameBuffer prevFilterBuffer, FrameBuffer sceneBuffer )
-    {
+    protected void postFrame( RenderManager renderManager, ViewPort viewPort, FrameBuffer prevFilterBuffer, FrameBuffer sceneBuffer ) {
+    
         RenderQueue rq = viewPort.getQueue();
         GeometryList casters = rq.getShadowQueueContent(ShadowMode.Cast);
         if( casters.size() == 0 )
@@ -210,15 +206,13 @@ public class DropShadowFilter extends Filter
         } else {
             shadowMaterial.clearParam("NumSamplesDepth");
         }
-//        shadowMaterial.setVector2( "NearFar", new Vector2f(cam.getFrustumNear(), cam.getFrustumFar()) );
 
         int size = casters.size();
-        if( size > maxShadows )
-            {
+        if( size > maxShadows ) {
             // Give the shadows their best chance by sorting them.
             casters.setCamera(cam);
             casters.sort();
-            }
+        }
 
         FloatBuffer bPos = (FloatBuffer)vbPos.getData().rewind();
         FloatBuffer bNormal = (FloatBuffer)vbNormal.getData().rewind();
@@ -237,8 +231,7 @@ public class DropShadowFilter extends Filter
         Vector3f boxScale = new Vector3f();
 
         int rendered = 0;
-        for( int i = 0; i < size; i++ )
-            {
+        for( int i = 0; i < size; i++ ) {
             Geometry g = casters.get(i);
 
             // Use the geometry bounds.  We assumg it is still y-up
@@ -275,10 +268,9 @@ public class DropShadowFilter extends Filter
             FrustumIntersect intersect = cam.contains(cullCheck);
             cam.setPlaneState(save);
 
-            if( intersect == FrustumIntersect.Outside )
-                {
+            if( intersect == FrustumIntersect.Outside ) {
                 continue;
-                }
+            }
 
             boxScale.set(0.5f/xEx, 0.5f/volumeHeight, 0.5f/zEx);
 
@@ -294,8 +286,7 @@ public class DropShadowFilter extends Filter
             worldViewMatrix.multLocal(worldMatrix);
 
             // Setup the vertexes for each corner
-            for( int j = 0; j < VERTS_PER_SHADOW; j++ )
-                {
+            for( int j = 0; j < VERTS_PER_SHADOW; j++ ) {
                 vTemp.set(BASE_CORNERS[j].x * xEx,
                           BASE_CORNERS[j].y * volumeHeight,
                           BASE_CORNERS[j].z * zEx);
@@ -317,29 +308,26 @@ public class DropShadowFilter extends Filter
 
                 // And so is the scale... since it's always the same
                 bTexCoord2.put(boxScale.x).put(boxScale.y).put(boxScale.z);
-                }
-
-            // Fill in the index buffer
-            for( int j = 0; j < INDEXES_PER_SHADOW; j++ )
-                {
-                bIndex.put( (short)(BASE_INDEXES[j] + rendered * VERTS_PER_SHADOW) );
-                }
-
-            rendered++;
-            if( rendered >= maxShadows )
-                break;
             }
 
-        if( rendered > 0 )
-            {
+            // Fill in the index buffer
+            for( int j = 0; j < INDEXES_PER_SHADOW; j++ ) {
+                bIndex.put( (short)(BASE_INDEXES[j] + rendered * VERTS_PER_SHADOW) );
+            }
+
+            rendered++;
+            if( rendered >= maxShadows ) {
+                break;
+            }
+        }
+
+        if( rendered > 0 ) {
             // Need to zero out the left-overs
-            for( int i = rendered; i < maxShadows; i++ )
-                {
-                for( int j = 0; j < INDEXES_PER_SHADOW; j++ )
-                    {
+            for( int i = rendered; i < maxShadows; i++ ) {
+                for( int j = 0; j < INDEXES_PER_SHADOW; j++ ) {
                     bIndex.put((short)0);
-                    }
                 }
+            }
 
             // Update the buffers
             bPos.rewind();
@@ -356,40 +344,37 @@ public class DropShadowFilter extends Filter
 
             shadowGeom.updateGeometricState();
             renderManager.renderGeometry(shadowGeom);
-            }
+        }
     }
 
-    private class CasterComparator implements GeometryComparator
-    {
+    private class CasterComparator implements GeometryComparator {
+    
         private Camera cam;
         private final Vector3f tempVec  = new Vector3f();
         private final Vector3f tempVec2 = new Vector3f();
 
-        public void setCamera( Camera cam )
-        {
+        public void setCamera( Camera cam ) {
             this.cam = cam;
         }
 
-        public float distanceToCam( Geometry spat )
-        {
-            if( spat == null )
+        public float distanceToCam( Geometry spat ) {
+            if( spat == null ) {
                 return Float.NEGATIVE_INFINITY;
+            }
 
-            if( spat.queueDistance != Float.NEGATIVE_INFINITY )
+            if( spat.queueDistance != Float.NEGATIVE_INFINITY ) {
                 return spat.queueDistance;
+            }
 
             Vector3f camPosition = cam.getLocation();
             Vector3f viewVector = cam.getDirection(tempVec2);
             Vector3f spatPosition;
 
-            if( spat.getWorldBound() != null )
-                {
+            if( spat.getWorldBound() != null ) {
                 spatPosition = spat.getWorldBound().getCenter();
-                }
-            else
-                {
+            } else {
                 spatPosition = spat.getWorldTranslation();
-                }
+            }
 
             spatPosition.subtract(camPosition, tempVec);
             spat.queueDistance = tempVec.dot(viewVector);
@@ -397,18 +382,18 @@ public class DropShadowFilter extends Filter
             return spat.queueDistance;
         }
 
-        public int compare(Geometry o1, Geometry o2)
-        {
+        public int compare( Geometry o1, Geometry o2 ) {
             // Front to back sort
             float d1 = distanceToCam(o1);
             float d2 = distanceToCam(o2);
 
-            if( d1 == d2 )
+            if( d1 == d2 ) {
                 return 0;
-            else if( d1 < d2 )
+            } else if( d1 < d2 ) {
                 return -1;
-            else
+            } else {
                 return 1;
+            }
         }
     }
 
