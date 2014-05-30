@@ -139,16 +139,5 @@ public class TreeEditor extends SimpleApplication {
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
         treeOptions.addOptionToggle("Grass", stateManager.getState(GroundState.class), "setShowGrass");                
         treeOptions.addOptionToggle("Sky", stateManager.getState(SkyState.class), "setShowSky");               
-    }
-    
-    protected void addBranches( Vector3f start, Segment seg, List<Vector3f> points ) {
-        
-        points.add(start);
-        Vector3f end = start.add(seg.dir.mult(seg.length));
-        points.add(end);
-        
-        for( Segment child : seg ) {
-            addBranches(end, child, points);
-        }
-    }
+    }    
 }
