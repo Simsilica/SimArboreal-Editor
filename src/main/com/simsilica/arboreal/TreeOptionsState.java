@@ -38,6 +38,7 @@ package com.simsilica.arboreal;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.simsilica.arboreal.ui.RollupPanel;
 import com.simsilica.arboreal.ui.TabbedPanel;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Checkbox;
@@ -76,6 +77,8 @@ public class TreeOptionsState extends BaseAppState {
  
     private List<Checkbox> optionToggles = new ArrayList<Checkbox>();
     private Map<String, Checkbox> optionToggleMap = new HashMap<String, Checkbox>();
+
+    private int columns = 3;
     
     public TreeOptionsState() {
     }
@@ -96,7 +99,7 @@ public class TreeOptionsState extends BaseAppState {
         Checkbox cb = new Checkbox(name, "glass");
         cb.addClickCommands(new ToggleHandler(target, method));
                         
-        int column = optionToggles.size() % 2;
+        int column = optionToggles.size() % columns;
         if( checkboxPanel != null ) {
             if( column == 0 ) {
                 checkboxPanel.addChild(cb);
@@ -122,29 +125,39 @@ public class TreeOptionsState extends BaseAppState {
         inputMapper.addDelegate( MainFunctions.F_HUD, this, "toggleHud" );
                 
         mainWindow = new Container(new BorderLayout(), new ElementId("window"), "glass");
-        mainWindow.addChild(new Label("Tree Options", mainWindow.getElementId().child("title.label"), "glass"),
-                           BorderLayout.Position.North); 
+        //mainWindow.addChild(new Label("Tree Options", mainWindow.getElementId().child("title.label"), "glass"),
+        //                   BorderLayout.Position.North); 
         mainWindow.setLocalTranslation(10, app.getCamera().getHeight() - 10, 0);        
         
         mainContents = mainWindow.addChild(new Container(mainWindow.getElementId().child("contents.container"), "glass"),
                                                         BorderLayout.Position.Center); 
                
+        //mainContents.addChild(new Label("Visualization Options:", "glass"));
         actionsPanel = mainContents.addChild(new Container());
-        viewSettingsPanel = mainContents.addChild(new Container());
-        checkboxPanel = mainContents.addChild(new Container());
+ 
+        Container visOptions = new Container();       
+        RollupPanel visRollup = new RollupPanel("Visualization Options", visOptions, 
+                                                new ElementId("root.rollup"), "glass");
+        mainContents.addChild(visRollup);
+        viewSettingsPanel = visOptions.addChild(new Container());
+        checkboxPanel = visOptions.addChild(new Container());
         
         // Add any toggles that were added before init
         int i = 0;
         for( Checkbox cb : optionToggles ) {
-            int column = (i++) % 2;
+            int column = (i++) % columns;
             if( column == 0 ) {
                 checkboxPanel.addChild(cb);
             } else {
                 checkboxPanel.addChild(cb, column);
             } 
         }
-        
-        tabs = mainContents.addChild(new TabbedPanel("glass"));
+         
+        //mainContents.addChild(new Label("Tree Parameters:", "glass"));
+        //tabs = mainContents.addChild(new TabbedPanel("glass"));
+        tabs = new TabbedPanel("glass");
+        mainContents.addChild(new RollupPanel("Tree Parameters", tabs, 
+                                               new ElementId("root.rollup"), "glass"));
     }
 
     @Override

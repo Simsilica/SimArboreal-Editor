@@ -180,9 +180,9 @@ public class ForestGridState extends BaseAppState {
         
         // Add some options check boxes for rendering
         TreeOptionsState options = getState(TreeOptionsState.class);
-        options.addOptionToggle("Show Wireframe", forestGrid, "setShowWireframe");
-        options.addOptionToggle("Show Test Pattern", this, "setShowTestPattern");
-        Checkbox cb = options.addOptionToggle("Show Bump-map", this, "setShowTrunkBumps");
+        options.addOptionToggle("Wireframe", forestGrid, "setShowWireframe");
+        options.addOptionToggle("Test Pattern", this, "setShowTestPattern");
+        Checkbox cb = options.addOptionToggle("Bump-map", this, "setShowTrunkBumps");
         cb.setChecked(true);
                 
         

@@ -196,3 +196,8 @@ selector( "tab.button", "glass" ) {
     buttonCommands = stdButtonCommands;
 }
 
+selector( "root.rollup.title", "glass" ) {
+    background = new QuadBackgroundComponent( color(0.25, 0.5, 0.85, 0.5) );
+    background.texture = texture( name:"/com/simsilica/lemur/icons/double-gradient-128.png", 
+                                  generateMips:false )
+}

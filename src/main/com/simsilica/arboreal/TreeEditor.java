@@ -137,8 +137,8 @@ public class TreeEditor extends SimpleApplication {
         new StyleLoader(GuiGlobals.getInstance().getStyles()).loadStyleResource(GLASS_STYLES);
  
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
-        treeOptions.addOptionToggle("Show Grass", stateManager.getState(GroundState.class), "setShowGrass");                
-        treeOptions.addOptionToggle("Show Sky", stateManager.getState(SkyState.class), "setShowSky");               
+        treeOptions.addOptionToggle("Grass", stateManager.getState(GroundState.class), "setShowGrass");                
+        treeOptions.addOptionToggle("Sky", stateManager.getState(SkyState.class), "setShowSky");               
     }
     
     protected void addBranches( Vector3f start, Segment seg, List<Vector3f> points ) {

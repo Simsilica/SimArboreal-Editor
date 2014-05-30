@@ -66,6 +66,10 @@ public class RollupPanel extends Panel {
     public RollupPanel( String title, Panel contents, String style ) {
         this(title, contents, true, new ElementId("rollup"), style);
     }
+
+    public RollupPanel( String title, Panel contents, ElementId elementId, String style ) {
+        this(title, contents, true, elementId, style);
+    }
     
     protected RollupPanel( String titleString, Panel contents, 
                            boolean applyStyles, ElementId elementId, String style ) {

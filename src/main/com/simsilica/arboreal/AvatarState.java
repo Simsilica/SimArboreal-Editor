@@ -45,6 +45,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.event.BaseAppState;
 
@@ -56,11 +57,19 @@ import com.simsilica.lemur.event.BaseAppState;
  */
 public class AvatarState extends BaseAppState {
 
-    private Node avatars;
+    private Node avatars;    
     private Spatial male;
     private Spatial female;
     
     public AvatarState() {
+    }
+
+    public void setShowAvatars( boolean b ) {
+        if( b ) {
+            avatars.setCullHint(CullHint.Inherit);
+        } else {
+            avatars.setCullHint(CullHint.Always);
+        }
     }
 
     @Override
@@ -99,7 +108,12 @@ public class AvatarState extends BaseAppState {
         // For testing
         //Spatial tree = assets.loadModel("Models/test1.j3o");
         //tree.setLocalTranslation(-20, 0, -20);
-        //avatars.attachChild(tree);    
+        //avatars.attachChild(tree);
+        
+        
+        TreeOptionsState options = getState(TreeOptionsState.class);
+        options.addOptionToggle("Avatars", this, "setShowAvatars").setChecked(true);
+                    
     } 
 
     @Override

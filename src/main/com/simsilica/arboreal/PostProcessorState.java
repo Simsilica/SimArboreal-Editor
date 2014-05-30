@@ -126,8 +126,8 @@ public class PostProcessorState extends BaseAppState {
         // Go ahead and add some UI stuff here... normally I'd
         // put it in another state but it doesn't seem worth it.
         TreeOptionsState options = getState(TreeOptionsState.class);
-        shadowToggle = options.addOptionToggle("Show Shadows", this, "setEnableShadows");
-        dropShadowToggle = options.addOptionToggle("Show Drop Shadows", this, "setEnableDropShadows");
+        shadowToggle = options.addOptionToggle("Shadows", this, "setEnableShadows");
+        dropShadowToggle = options.addOptionToggle("Drop Shadows", this, "setEnableDropShadows");
         
         
         // Add some parameters to the main options window
