@@ -43,6 +43,7 @@ import com.jme3.post.FilterPostProcessor;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.system.AppSettings;
 import com.simsilica.arboreal.ui.PropertyPanel;
+import com.simsilica.lemur.Checkbox;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.BaseAppState;
 
@@ -58,12 +59,27 @@ public class PostProcessorState extends BaseAppState {
     private DropShadowFilter shadows2;
     private VersionedReference<Vector3f> lightDir;
     private float shadowStrength = 0.3f;
+    
+    private Checkbox shadowToggle;
+    private Checkbox dropShadowToggle;
 
     public PostProcessorState() {
     }
 
     public void setEnableShadows( boolean b ) {
         shadows1.setEnabled(b);
+        if( b && shadows2.isEnabled() ) {
+            shadows2.setEnabled(false);
+            dropShadowToggle.setChecked(false);
+        }
+    }
+
+    public void setEnableDropShadows( boolean b ) {
+        shadows2.setEnabled(b);
+        if( b && shadows1.isEnabled() ) {
+            shadows1.setEnabled(false);
+            shadowToggle.setChecked(false);
+        }
     }
     
     public void setShadowStrength( float f ) {
@@ -80,6 +96,7 @@ public class PostProcessorState extends BaseAppState {
 
     protected void resetShadowStrength() {
         shadows1.setShadowIntensity(shadowStrength);
+        shadows2.setShadowIntensity(shadowStrength);
     }
 
     @Override
@@ -96,20 +113,21 @@ public class PostProcessorState extends BaseAppState {
             fpp.setNumSamples(settings.getSamples());
             }
 
+        shadows2 = new DropShadowFilter();
+        shadows2.setEnabled(false);
+        fpp.addFilter(shadows2);
+        
         shadows1 = new DirectionalLightShadowFilter(assets, 4096, 4);
         shadows1.setShadowIntensity(0.3f);
         shadows1.setLight(getState(LightingState.class).getSun());
         shadows1.setEnabled(false);
         fpp.addFilter(shadows1);
 
-        shadows2 = new DropShadowFilter();
-        shadows2.setEnabled(false);
-        fpp.addFilter(shadows2);
-        
         // Go ahead and add some UI stuff here... normally I'd
         // put it in another state but it doesn't seem worth it.
         TreeOptionsState options = getState(TreeOptionsState.class);
-        options.addOptionToggle("Show Shadows", this, "setEnableShadows");
+        shadowToggle = options.addOptionToggle("Show Shadows", this, "setEnableShadows");
+        dropShadowToggle = options.addOptionToggle("Show Drop Shadows", this, "setEnableDropShadows");
         
         
         // Add some parameters to the main options window

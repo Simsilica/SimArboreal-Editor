@@ -103,6 +103,8 @@ public class DropShadowFilter extends Filter
     private Material shadowMaterial;
     private Mesh mesh;
     private int maxShadows;
+    
+    private ColorRGBA shadowColor = new ColorRGBA(0, 0, 0, 0.75f);
 
     private VertexBuffer vbPos;
     private VertexBuffer vbNormal;
@@ -119,6 +121,14 @@ public class DropShadowFilter extends Filter
     {
         this.maxShadows = maxShadows;
     }
+
+    public void setShadowIntensity( float f ) {
+        shadowColor.a = f;
+    }
+    
+    public float getShadowIntensity() {
+        return shadowColor.a;
+    }    
 
     @Override
     protected boolean isRequiresDepthTexture()
@@ -151,7 +161,7 @@ public class DropShadowFilter extends Filter
 
         shadowGeom = new Geometry("shadowVolumes", mesh);
         Material m = shadowMaterial = new Material( assets, "MatDefs/Shadows.j3md" );
-        m.setColor( "ShadowColor", new ColorRGBA(0,0,0,0.75f) );
+        m.setColor( "ShadowColor", shadowColor );
         m.getAdditionalRenderState().setDepthWrite(false);
         m.getAdditionalRenderState().setDepthTest(false); 
         m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
