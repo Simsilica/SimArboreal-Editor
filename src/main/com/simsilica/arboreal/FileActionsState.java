@@ -44,16 +44,14 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.event.BaseAppState;
-import java.awt.Component;
-import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import org.progeeks.json.JsonParser;
@@ -208,9 +206,18 @@ public class FileActionsState extends BaseAppState {
             if( f == null ) {
                 return;
             }
+            if( f.exists() ) {
+                int result = JOptionPane.showConfirmDialog(null, "Overwrite file?\n" + f, 
+                                                           "File Already Exists",
+                                                           JOptionPane.YES_NO_CANCEL_OPTION);
+                if( result != JOptionPane.YES_OPTION ) {
+                    return;
+                }                                                            
+            }
             
             BinaryExporter exporter = BinaryExporter.getInstance();
             try {
+                System.out.println( "Writing:" + f );
                 exporter.save(getState(ForestGridState.class).getMainTreeNode(), f);
             } catch( IOException e ) {
                 log.error( "Error saving tree", e );
@@ -229,9 +236,19 @@ public class FileActionsState extends BaseAppState {
                 return;
             }
  
+            if( f.exists() ) {
+                int result = JOptionPane.showConfirmDialog(null, "Overwrite file?\n" + f, 
+                                                           "File Already Exists",
+                                                           JOptionPane.YES_NO_CANCEL_OPTION);
+                if( result != JOptionPane.YES_OPTION ) {
+                    return;
+                }                                                            
+            }
+            
             TreeParameters treeParameters = getState(TreeParametersState.class).getTreeParameters();
             Map<String, Object> map = treeParameters.toMap();
             try {
+                System.out.println( "Writing:" + f );
                 writeJson(f, map);
             } catch( IOException e ) {
                 log.error("Error writing file:" + f, e);
