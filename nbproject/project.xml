@@ -19,7 +19,7 @@
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
             <name>SimArboreal-Editor</name>
             <source-roots>
-                <root id="src.main.dir"/>
+                <root id="src.java.dir"/>
             </source-roots>
             <test-roots/>
         </data>
