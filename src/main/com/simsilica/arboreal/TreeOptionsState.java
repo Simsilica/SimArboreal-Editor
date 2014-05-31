@@ -38,14 +38,13 @@ package com.simsilica.arboreal;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.simsilica.arboreal.ui.RollupPanel;
-import com.simsilica.arboreal.ui.TabbedPanel;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Checkbox;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.Label;
+import com.simsilica.lemur.RollupPanel;
+import com.simsilica.lemur.TabbedPanel;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.event.BaseAppState;
 import com.simsilica.lemur.input.InputMapper;

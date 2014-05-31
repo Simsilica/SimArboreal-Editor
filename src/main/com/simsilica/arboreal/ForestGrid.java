@@ -41,7 +41,7 @@ import com.jme3.material.Material;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.scene.Node;
-import com.simsilica.arboreal.builder.Builder;
+import com.simsilica.builder.Builder;
 import java.util.Random;
 
 
@@ -75,7 +75,6 @@ public class ForestGrid {
     private Material impostorMaterial;
  
     private boolean showWireframe;
-    private boolean showLeaves;
        
     public ForestGrid( TreeParameters treeParameters, 
                        Material treeMaterial,

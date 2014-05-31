@@ -37,7 +37,7 @@
 package com.simsilica.arboreal;
 
 import com.jme3.app.Application;
-import com.simsilica.arboreal.builder.Builder;
+import com.simsilica.builder.Builder;
 import com.simsilica.lemur.event.BaseAppState;
 
 
