@@ -40,18 +40,14 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.ScreenshotAppState;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.system.AppSettings;
-import com.simsilica.arboreal.mesh.LineMeshGenerator;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.input.InputMapper;
+import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.StyleLoader;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.List;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +130,9 @@ public class TreeEditor extends SimpleApplication {
         rootNode.attachChild(geom);
         */ 
 
-        new StyleLoader(GuiGlobals.getInstance().getStyles()).loadStyleResource(GLASS_STYLES);
+        BaseStyles.loadGlassStyle();
+
+        //new StyleLoader(GuiGlobals.getInstance().getStyles()).loadStyleResource(GLASS_STYLES);
  
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
         treeOptions.addOptionToggle("Grass", stateManager.getState(GroundState.class), "setShowGrass");                
