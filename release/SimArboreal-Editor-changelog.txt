@@ -1,4 +1,27 @@
 
+Revision 69
+-------------
+- Added Y offset parameter that is separate from trunk
+    height.
+- Added LOD support including two mesh reduction strategies:
+    Flat-Poly : renders the tree branches as a set of axis-aligned
+                billboarded flat quads.
+    Impostor : renders a single quad with a view-direction indexed texture.
+                (Note: impostors currently don't save properly to the j3o) 
+- Better visual separate of child properies in the UI.
+- Reorganized UI to include outer rollup panels to separate vis
+    settings from tree parameters.
+- Added an avatar toggle to the UI.
+- Added shadow intensity and lighting direction settings to the
+    UI.
+- Added a simplified 'drop shadow' filter that can be enabled instead
+    of regular shadows.
+- File write operations now warn before overwriting existing files.
+- Cleaned out the wire frame meshes from the exported j3o during save.
+- Renamed the tree geometry elements to make more sense when viewing
+    the tree object in something like Scene Composer.        
+        
+
 Revision 33
 -------------
 - Initial release
