@@ -45,7 +45,6 @@ import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
-import com.simsilica.arboreal.ui.PropertyPanel;
 import com.simsilica.lemur.Checkbox;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -54,6 +53,7 @@ import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.core.VersionedHolder;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.BaseAppState;
+import com.simsilica.lemur.props.PropertyPanel;
 import com.simsilica.lemur.style.ElementId;
 
 

@@ -1,4 +1,12 @@
 
+Revision ??
+------------
+- Moved RollupPanel and TabbedPanel out into Lemur core.
+- Moved the builder classes out into the new simsilica-tools Pager
+    library.
+- Moved PropertyPanel into its own Lemur extension project LemurProps.
+
+
 Revision 69
 -------------
 - Added Y offset parameter that is separate from trunk
