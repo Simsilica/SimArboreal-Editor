@@ -5,6 +5,8 @@ Revision ??
 - Moved the builder classes out into the new simsilica-tools Pager
     library.
 - Moved PropertyPanel into its own Lemur extension project LemurProps.
+- Converted to use the now-standard Lemur 'glass' style with just a few
+    local custom extensions.    
 
 
 Revision 69
