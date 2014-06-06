@@ -1,5 +1,5 @@
 
-Revision ??
+Revision 94
 ------------
 - Moved RollupPanel and TabbedPanel out into Lemur core.
 - Moved the builder classes out into the new simsilica-tools Pager
