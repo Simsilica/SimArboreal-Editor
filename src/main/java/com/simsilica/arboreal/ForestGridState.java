@@ -36,6 +36,7 @@
 
 package com.simsilica.arboreal;
 
+import com.simsilica.builder.BuilderState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;

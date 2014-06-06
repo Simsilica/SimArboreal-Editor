@@ -36,6 +36,7 @@
 
 package com.simsilica.arboreal;
 
+import com.simsilica.builder.BuilderState;
 import com.jme3.app.Application;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.font.BitmapFont;
