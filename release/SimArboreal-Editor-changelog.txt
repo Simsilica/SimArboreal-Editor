@@ -2,6 +2,9 @@ Revision ???
 -------------
 - Added an action to save the tree atlas images
     as PNG files.
+- Fixed how the atlas textures are generated so that they
+    save as embedded textures in the j3o.
+    
 
 Revision 126
 -------------

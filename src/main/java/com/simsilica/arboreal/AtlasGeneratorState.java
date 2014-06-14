@@ -100,8 +100,10 @@ public class AtlasGeneratorState extends BaseAppState {
     private FrameBuffer diffuseFb;
     private FrameBuffer normalFb;   
     private CellView[] cellViews = new CellView[8];
-    private Image diffuseMap;    
-    private Image normalMap;    
+    private Image diffuseMap;
+    private Texture2D diffuseTexture;    
+    private Image normalMap;
+    private Texture2D normalTexture;    
 
     private BitmapFont font;
     
@@ -113,31 +115,43 @@ public class AtlasGeneratorState extends BaseAppState {
     }
     
     public Image getDiffuseMap() {
-        if( diffuseMap == null ) {
-            Renderer renderer = getApplication().getRenderer();
-            int width = diffuseFb.getWidth();
-            int height = diffuseFb.getHeight();  
-            int size = width * height * 4;
-            ByteBuffer buffer = BufferUtils.createByteBuffer(size);
-            renderer.readFrameBuffer(diffuseFb, buffer);
-            Image.Format format = diffuseFb.getColorBuffer().getFormat();
-            diffuseMap = new Image(format, width, height, buffer);    
-        }   
         return diffuseMap;
     }
     
     public Image getNormalMap() {
-        if( normalMap == null ) {
-            Renderer renderer = getApplication().getRenderer();
-            int width = normalFb.getWidth();
-            int height = normalFb.getHeight();  
-            int size = width * height * 4;
-            ByteBuffer buffer = BufferUtils.createByteBuffer(size);
-            renderer.readFrameBuffer(normalFb, buffer);
-            Image.Format format = normalFb.getColorBuffer().getFormat();
-            normalMap = new Image(format, width, height, buffer);    
-        }   
         return normalMap;
+    }
+
+    protected Image createFrameBufferImage( FrameBuffer fb ) {
+        int width = fb.getWidth();
+        int height = fb.getHeight();  
+        int size = width * height * 4;
+        ByteBuffer buffer = BufferUtils.createByteBuffer(size);
+        Image.Format format = fb.getColorBuffer().getFormat();
+        
+        // I guess readFrameBuffer always writes in the same
+        // format regardless of the frame buffer format
+        format = Format.BGRA8;        
+        return new Image(format, width, height, buffer);            
+    }
+
+    protected void updateTextures() {
+        Renderer renderer = getApplication().getRenderer();
+        if( diffuseMap == null ) {
+            diffuseMap = createFrameBufferImage(diffuseFb);
+            diffuseTexture = new Texture2D(diffuseMap);
+            getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", diffuseTexture);       
+        }
+        renderer.readFrameBuffer(diffuseFb, diffuseMap.getData(0));
+        
+        if( normalMap == null ) {
+            normalMap = createFrameBufferImage(normalFb);
+            normalTexture = new Texture2D(normalMap);
+            if( useNormalMaps ) {
+                getState(ForestGridState.class).getImpostorMaterial().setTexture("NormalMap", normalTexture);
+            }       
+        }
+        renderer.readFrameBuffer(normalFb, normalMap.getData(0));
     }
 
     @Override
@@ -162,18 +176,13 @@ public class AtlasGeneratorState extends BaseAppState {
         diffuseFb = fb1;
         Texture2D fbTex1 = new Texture2D(1024, 256, Format.RGBA8);
         fb1.setDepthBuffer(Format.Depth);
-        fb1.setColorTexture(fbTex1);
-        getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", fbTex1);
+        fb1.setColorTexture(fbTex1);        
     
         FrameBuffer fb2 = new FrameBuffer(1024, 256, 1);
         normalFb = fb2;
         Texture2D fbTex2 = new Texture2D(1024, 256, Format.RGBA8);
         fb2.setDepthBuffer(Format.Depth);
         fb2.setColorTexture(fbTex2); 
-        
-        if( useNormalMaps ) {
-            getState(ForestGridState.class).getImpostorMaterial().setTexture("NormalMap", fbTex2);
-        }
         
  
         if( debugTextures ) {       
@@ -251,8 +260,7 @@ public class AtlasGeneratorState extends BaseAppState {
             }
         }
         
-        diffuseMap = null;
-        normalMap = null;
+        updateTextures();
     }
 
     protected void releaseMesh( Mesh mesh ) {
