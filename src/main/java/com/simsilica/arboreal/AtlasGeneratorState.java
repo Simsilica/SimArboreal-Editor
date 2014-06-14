@@ -50,6 +50,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.Renderer;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
@@ -59,6 +60,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.debug.WireBox;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.FrameBuffer;
+import com.jme3.texture.Image;
 import com.jme3.texture.Image.Format;
 import com.jme3.texture.Texture2D;
 import com.jme3.util.BufferUtils;
@@ -70,6 +72,7 @@ import com.simsilica.builder.BuilderReference;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.BaseAppState;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -93,14 +96,49 @@ public class AtlasGeneratorState extends BaseAppState {
 
     private Mesh trunkMesh;
     private Mesh leafMesh;
-    
-    private CellView[] cellViews = new CellView[8];    
+ 
+    private FrameBuffer diffuseFb;
+    private FrameBuffer normalFb;   
+    private CellView[] cellViews = new CellView[8];
+    private Image diffuseMap;    
+    private Image normalMap;    
 
     private BitmapFont font;
     
     private boolean debugTextures = false;
     
     private boolean useNormalMaps = true;
+
+    public AtlasGeneratorState() {
+    }
+    
+    public Image getDiffuseMap() {
+        if( diffuseMap == null ) {
+            Renderer renderer = getApplication().getRenderer();
+            int width = diffuseFb.getWidth();
+            int height = diffuseFb.getHeight();  
+            int size = width * height * 4;
+            ByteBuffer buffer = BufferUtils.createByteBuffer(size);
+            renderer.readFrameBuffer(diffuseFb, buffer);
+            Image.Format format = diffuseFb.getColorBuffer().getFormat();
+            diffuseMap = new Image(format, width, height, buffer);    
+        }   
+        return diffuseMap;
+    }
+    
+    public Image getNormalMap() {
+        if( normalMap == null ) {
+            Renderer renderer = getApplication().getRenderer();
+            int width = normalFb.getWidth();
+            int height = normalFb.getHeight();  
+            int size = width * height * 4;
+            ByteBuffer buffer = BufferUtils.createByteBuffer(size);
+            renderer.readFrameBuffer(normalFb, buffer);
+            Image.Format format = normalFb.getColorBuffer().getFormat();
+            normalMap = new Image(format, width, height, buffer);    
+        }   
+        return normalMap;
+    }
 
     @Override
     protected void initialize( Application app ) {
@@ -117,16 +155,18 @@ public class AtlasGeneratorState extends BaseAppState {
         
         Camera camera = app.getCamera().clone();   
         camera.resize(256, 256, true);
-        camera.resize(1024, 256, false);
+        camera.resize(1024, 256, false); 
   
  
         FrameBuffer fb1 = new FrameBuffer(1024, 256, 1);
+        diffuseFb = fb1;
         Texture2D fbTex1 = new Texture2D(1024, 256, Format.RGBA8);
         fb1.setDepthBuffer(Format.Depth);
         fb1.setColorTexture(fbTex1);
         getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", fbTex1);
     
         FrameBuffer fb2 = new FrameBuffer(1024, 256, 1);
+        normalFb = fb2;
         Texture2D fbTex2 = new Texture2D(1024, 256, Format.RGBA8);
         fb2.setDepthBuffer(Format.Depth);
         fb2.setColorTexture(fbTex2); 
@@ -210,6 +250,9 @@ public class AtlasGeneratorState extends BaseAppState {
                 view.updateMesh(trunkMesh, leafMesh);
             }
         }
+        
+        diffuseMap = null;
+        normalMap = null;
     }
 
     protected void releaseMesh( Mesh mesh ) {

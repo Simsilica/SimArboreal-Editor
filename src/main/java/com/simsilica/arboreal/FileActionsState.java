@@ -42,15 +42,19 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.SceneGraphVisitorAdapter;
 import com.jme3.scene.Spatial;
 import com.jme3.system.JmeSystem;
+import com.jme3.texture.Image;
+import com.jme3.texture.Texture2D;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.event.BaseAppState;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JFileChooser;
@@ -93,6 +97,10 @@ public class FileActionsState extends BaseAppState {
         Button saveJ3o = buttons.addChild(new Button("Export j3o", "glass"), 2);
         saveJ3o.addClickCommands(new SaveJ3o());
         saveJ3o.setTextHAlignment(HAlignment.Center);
+        
+        Button saveTreeAtlas = buttons.addChild(new Button("Save Tree Atlas", "glass"));
+        saveTreeAtlas.addClickCommands(new SaveTreeAtlas());
+        saveTreeAtlas.setTextHAlignment(HAlignment.Center);
     } 
 
     @Override
@@ -241,6 +249,30 @@ public class FileActionsState extends BaseAppState {
         getState(TreeParametersState.class).refreshTreePanels();
         getState(ForestGridState.class).rebuild();
     }
+
+    public void savePng( File f, Image img ) throws IOException {
+        OutputStream out = new FileOutputStream(f);
+        try {            
+            JmeSystem.writeImageFile(out, "png", img.getData(0), img.getWidth(), img.getHeight());  
+        } finally {
+            out.close();
+        }             
+    }
+
+    public void saveTreeAtlas( File f ) throws IOException {
+
+        Image diffuse = getState(AtlasGeneratorState.class).getDiffuseMap();
+        savePng(f, diffuse);
+        
+        String normalName = f.getName();
+        if( normalName.toLowerCase().endsWith(".png") ) {
+            normalName = normalName.substring(0, normalName.length() - ".png".length());
+        }
+        f = new File(f.getParentFile(), normalName + "-normals.png");
+        
+        Image normal = getState(AtlasGeneratorState.class).getNormalMap();
+        savePng(f, normal);
+    }
     
     private class SaveJ3o implements Command<Button> {
 
@@ -319,4 +351,30 @@ public class FileActionsState extends BaseAppState {
         }
     }
  
+    private class SaveTreeAtlas implements Command<Button> {
+    
+        @Override
+        public void execute( Button source ) {
+        
+            File f = chooseFile("png", "Tree Atlas Images", true);
+            if( f == null ) {
+                return;
+            }
+            if( f.exists() ) {
+                int result = JOptionPane.showConfirmDialog(null, "Overwrite file?\n" + f, 
+                                                           "File Already Exists",
+                                                           JOptionPane.YES_NO_CANCEL_OPTION);
+                if( result != JOptionPane.YES_OPTION ) {
+                    return;
+                }                                                            
+            }
+ 
+            try {
+                saveTreeAtlas(f);       
+            } catch( IOException e ) {
+                log.error("Error writing file:" + f, e);
+                JmeSystem.showErrorDialog("Error writing file:" + f + "\n" + e);                
+            }
+        }
+    }
 }

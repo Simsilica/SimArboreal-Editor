@@ -1,3 +1,8 @@
+Revision ???
+-------------
+- Added an action to save the tree atlas images
+    as PNG files.
+
 Revision 126
 -------------
 - Reworked the FileActionsState to better allow embedding
