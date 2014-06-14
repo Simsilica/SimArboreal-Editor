@@ -1,3 +1,11 @@
+Revision 126
+-------------
+- Reworked the FileActionsState to better allow embedding
+    in external applications.  Save and load methods were added
+    and the buttons are now not added to the UI unless the state
+    is enabled.  This should help facilitate a parallel JME SDK
+    plug-in effort.
+
 
 Revision 94
 ------------
