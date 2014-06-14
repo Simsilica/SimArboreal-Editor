@@ -72,14 +72,15 @@ public class FileActionsState extends BaseAppState {
 
     static Logger log = LoggerFactory.getLogger(FileActionsState.class);
 
+    private Container buttons;
+
     public FileActionsState() {
     }
 
     @Override
     protected void initialize( Application app ) {
 
-        Container buttons = new Container();
-        getState(TreeOptionsState.class).getContents().addChild(buttons);
+        buttons = new Container();
         
         Button saveParms = buttons.addChild(new Button("Save Parms", "glass"));
         saveParms.addClickCommands(new SaveTreeParameters());
@@ -100,10 +101,12 @@ public class FileActionsState extends BaseAppState {
 
     @Override
     protected void enable() {
+        getState(TreeOptionsState.class).getContents().addChild(buttons);
     }
 
     @Override
     protected void disable() {
+        getState(TreeOptionsState.class).getContents().removeChild(buttons);
     }
  
     /**
@@ -218,6 +221,27 @@ public class FileActionsState extends BaseAppState {
         }
     }
     
+    public void saveJ3o( File f ) throws IOException {
+        BinaryExporter exporter = BinaryExporter.getInstance();
+        log.info("Writing:" + f);
+        exporter.save(filterClone(getState(ForestGridState.class).getMainTreeNode()), f);
+    }
+
+    public void saveTreeParameters( File f ) throws IOException {    
+        TreeParameters treeParameters = getState(TreeParametersState.class).getTreeParameters();
+        Map<String, Object> map = treeParameters.toMap();
+        log.info("Writing:" + f);
+        writeJson(f, map);
+    }
+
+    public void loadTreeParameters( File f ) throws IOException {    
+        Map<String, Object> map = readJson(f);
+        TreeParameters treeParameters = getState(TreeParametersState.class).getTreeParameters();
+        treeParameters.fromMap(map);
+        getState(TreeParametersState.class).refreshTreePanels();
+        getState(ForestGridState.class).rebuild();
+    }
+    
     private class SaveJ3o implements Command<Button> {
 
         @Override
@@ -237,12 +261,11 @@ public class FileActionsState extends BaseAppState {
                 }                                                            
             }
             
-            BinaryExporter exporter = BinaryExporter.getInstance();
             try {
-                System.out.println( "Writing:" + f );
-                exporter.save(filterClone(getState(ForestGridState.class).getMainTreeNode()), f);
+                saveJ3o(f);               
             } catch( IOException e ) {
-                log.error( "Error saving tree", e );
+                log.error( "Error saving tree to:" + f, e );
+                JmeSystem.showErrorDialog("Error writing file:" + f + "\n" + e);                
             }
         }
     }
@@ -267,11 +290,8 @@ public class FileActionsState extends BaseAppState {
                 }                                                            
             }
             
-            TreeParameters treeParameters = getState(TreeParametersState.class).getTreeParameters();
-            Map<String, Object> map = treeParameters.toMap();
             try {
-                System.out.println( "Writing:" + f );
-                writeJson(f, map);
+                saveTreeParameters(f);
             } catch( IOException e ) {
                 log.error("Error writing file:" + f, e);
                 JmeSystem.showErrorDialog("Error writing file:" + f + "\n" + e);                
@@ -291,11 +311,7 @@ public class FileActionsState extends BaseAppState {
             }
              
             try {
-                Map<String, Object> map = readJson(f);
-                TreeParameters treeParameters = getState(TreeParametersState.class).getTreeParameters();
-                treeParameters.fromMap(map);
-                getState(TreeParametersState.class).refreshTreePanels();
-                getState(ForestGridState.class).rebuild();
+                loadTreeParameters(f);
             } catch( IOException e ) {
                 log.error("Error reading file:" + f, e);
                 JmeSystem.showErrorDialog("Error reading file:" + f + "\n" + e);                
