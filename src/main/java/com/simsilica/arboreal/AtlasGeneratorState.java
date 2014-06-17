@@ -103,7 +103,8 @@ public class AtlasGeneratorState extends BaseAppState {
     private Image diffuseMap;
     private Texture2D diffuseTexture;    
     private Image normalMap;
-    private Texture2D normalTexture;    
+    private Texture2D normalTexture;
+    private int needTextureUpdate;    
 
     private BitmapFont font;
     
@@ -136,6 +137,7 @@ public class AtlasGeneratorState extends BaseAppState {
     }
 
     protected void updateTextures() {
+
         Renderer renderer = getApplication().getRenderer();
         if( diffuseMap == null ) {
             diffuseMap = createFrameBufferImage(diffuseFb);
@@ -143,6 +145,7 @@ public class AtlasGeneratorState extends BaseAppState {
             getState(ForestGridState.class).getImpostorMaterial().setTexture("DiffuseMap", diffuseTexture);       
         }
         renderer.readFrameBuffer(diffuseFb, diffuseMap.getData(0));
+        diffuseMap.setUpdateNeeded();
         
         if( normalMap == null ) {
             normalMap = createFrameBufferImage(normalFb);
@@ -150,8 +153,11 @@ public class AtlasGeneratorState extends BaseAppState {
             if( useNormalMaps ) {
                 getState(ForestGridState.class).getImpostorMaterial().setTexture("NormalMap", normalTexture);
             }       
-        }
+        }        
         renderer.readFrameBuffer(normalFb, normalMap.getData(0));
+        normalMap.setUpdateNeeded();
+        
+        needTextureUpdate = 0;       
     }
 
     @Override
@@ -186,16 +192,32 @@ public class AtlasGeneratorState extends BaseAppState {
         
  
         if( debugTextures ) {       
-            Quad testQuad = new Quad(1024, 256);
+            Quad testQuad = new Quad(512, 128);
             Geometry testGeom = new Geometry("test", testQuad);
             Material mat = GuiGlobals.getInstance().createMaterial(fbTex1, false).getMaterial();
             testGeom.setMaterial(mat);
             ((TreeEditor)app).getGuiNode().attachChild(testGeom);
             
-            testQuad = new Quad(1024, 256);
+            testQuad = new Quad(512, 128);
+            testGeom = new Geometry("test", testQuad);
+            testGeom.setLocalTranslation(0, 128, 0);
+            mat = GuiGlobals.getInstance().createMaterial(fbTex2, false).getMaterial();
+            testGeom.setMaterial(mat);
+            ((TreeEditor)app).getGuiNode().attachChild(testGeom);
+            
+            updateTextures();
+            
+            testQuad = new Quad(512, 128);
             testGeom = new Geometry("test", testQuad);
             testGeom.setLocalTranslation(0, 256, 0);
-            mat = GuiGlobals.getInstance().createMaterial(fbTex2, false).getMaterial();
+            mat = GuiGlobals.getInstance().createMaterial(diffuseTexture, false).getMaterial();
+            testGeom.setMaterial(mat);
+            ((TreeEditor)app).getGuiNode().attachChild(testGeom);
+            
+            testQuad = new Quad(512, 128);
+            testGeom = new Geometry("test", testQuad);
+            testGeom.setLocalTranslation(0, 384, 0);
+            mat = GuiGlobals.getInstance().createMaterial(normalTexture, false).getMaterial();
             testGeom.setMaterial(mat);
             ((TreeEditor)app).getGuiNode().attachChild(testGeom);
         }
@@ -259,8 +281,14 @@ public class AtlasGeneratorState extends BaseAppState {
                 view.updateMesh(trunkMesh, leafMesh);
             }
         }
-        
-        updateTextures();
+ 
+        // Texture updates need to happen one frame late...
+        // but we get the notification that we need the check
+        // early in _this_ frame.  ie: updateTree() is called
+        // before our update(), render().  If we want to render
+        // a frame later then we need to skip this frame before
+        // updating textures.
+        needTextureUpdate = 2;       
     }
 
     protected void releaseMesh( Mesh mesh ) {
@@ -282,7 +310,7 @@ public class AtlasGeneratorState extends BaseAppState {
     @Override
     public void update( float tpf ) {
         lastTpf = tpf;
-        
+ 
         nextUpdateCheck += tpf;
         if( nextUpdateCheck <= 0.1f ) {
             return;
@@ -308,6 +336,16 @@ public class AtlasGeneratorState extends BaseAppState {
                 }               
             }
         }
+ 
+        // Texture updates need to happen one frame later...
+        // but we get the notification that we need the check
+        // early in _this_ frame.
+        if( needTextureUpdate > 0 ) {
+            needTextureUpdate--;
+            if( needTextureUpdate == 0 ) {
+                updateTextures();
+            }
+        }       
     }
 
     private class CellView {
