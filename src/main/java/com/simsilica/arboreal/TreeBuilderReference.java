@@ -430,7 +430,7 @@ public class TreeBuilderReference implements BuilderReference
                                 0, 1f,
                                 1, 1f
                             });
-                    mesh.setBuffer(Type.Index, 3, new int[] {
+                    mesh.setBuffer(Type.Index, 3, new short[] {
                                 0, 1, 3,
                                 0, 3, 2
                             });
