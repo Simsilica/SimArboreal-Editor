@@ -269,6 +269,7 @@ public class ForestGridState extends BaseAppState {
             forestGrid.markChanged();
             forestGrid.rebuild();
             refreshStats();
+            refreshWindParms();
         }
         
         if( building.getObject() && getState(BuilderState.class).getBuilder().getPending() == 0 ) {
@@ -290,6 +291,29 @@ public class ForestGridState extends BaseAppState {
             vertsLabel.setText("verts: " + mainTree.getVertexCount());
             trisLabel.setText("tris: " + mainTree.getTriangleCount());
         }        
+    }
+    
+    protected void refreshWindParms() {
+        if( treeMaterial == null ) {
+            // too soon
+            return;
+        }
+        TreeParameters tp = treeParameters.get();
+ 
+        treeMaterial.setFloat("FlexHeight", tp.getFlexHeight());
+        treeMaterial.setFloat("TrunkFlexibility", tp.getTrunkFlexibility());
+        treeMaterial.setFloat("BranchFlexibility", tp.getBranchFlexibility());
+
+        leafMaterial.setFloat("FlexHeight", tp.getFlexHeight());
+        leafMaterial.setFloat("TrunkFlexibility", tp.getTrunkFlexibility());
+        leafMaterial.setFloat("BranchFlexibility", tp.getBranchFlexibility());
+ 
+        flatMaterial.setFloat("FlexHeight", tp.getFlexHeight());
+        flatMaterial.setFloat("TrunkFlexibility", tp.getTrunkFlexibility());
+        flatMaterial.setFloat("BranchFlexibility", tp.getBranchFlexibility());
+ 
+        impostorMaterial.setFloat("TrunkFlexibility", tp.getTrunkFlexibility());
+       
     }
     
     public Material getTreeMaterial() {

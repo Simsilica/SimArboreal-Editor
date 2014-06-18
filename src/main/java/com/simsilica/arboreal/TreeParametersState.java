@@ -118,9 +118,12 @@ public class TreeParametersState extends BaseAppState {
         properties.addFloatProperty("Radius (m)", treeParameters, "trunkRadius", 0.05f, 10f, 0.05f);
         properties.addFloatProperty("Height (m)", treeParameters, "trunkHeight", 0.1f, 50f, 0.1f);
         properties.addFloatProperty("Root Height (m)", treeParameters, "rootHeight", 0f, 10f, 0.1f);
-        properties.addFloatProperty("Y Offset (m)", treeParameters, "YOffset", 0f, 10f, 0.1f);
+        properties.addFloatProperty("Y Offset (m)", treeParameters, "YOffset", 0f, 10f, 0.01f);        
         properties.addIntProperty("Texture U Repeat", treeParameters, "textureURepeat", 1, 12, 1);
         properties.addFloatProperty("Texture V Scale", treeParameters, "textureVScale", 0.01f, 10f, 0.1f);
+        properties.addFloatProperty("Wind Flex Height (m)", treeParameters, "flexHeight", 0.0f, 50, 0.01f);
+        properties.addFloatProperty("Trunk Flex.", treeParameters, "trunkFlexibility", 0.0f, 5.0f, 0.001f); 
+        properties.addFloatProperty("Branch Flex.", treeParameters, "branchFlexibility", 0.0f, 5.0f, 0.001f); 
         
         Container branchPanels = new Container("glass");
         tabs.addTab("Branches", branchPanels);

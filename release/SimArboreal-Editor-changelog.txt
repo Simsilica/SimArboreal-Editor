@@ -7,6 +7,7 @@ Revision ???
 - Fixed impostor meshes to use short buffers instead of int.
 - Added toggleable noise-based wind
 - Added a video recodring option F12
+- Added editors for the tree wind-related parameters
     
 
 Revision 126
