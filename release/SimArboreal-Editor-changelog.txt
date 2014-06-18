@@ -4,6 +4,9 @@ Revision ???
     as PNG files.
 - Fixed how the atlas textures are generated so that they
     save as embedded textures in the j3o.
+- Fixed impostor meshes to use short buffers instead of int.
+- Added toggleable noise-based wind
+- Added a video recodring option F12
     
 
 Revision 126

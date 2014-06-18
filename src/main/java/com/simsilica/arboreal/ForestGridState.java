@@ -44,6 +44,7 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector4f;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import com.simsilica.lemur.Checkbox;
@@ -81,6 +82,7 @@ public class ForestGridState extends BaseAppState {
     private Texture barkBumps;
     private Texture leafAtlas;
     private Texture testPattern;
+    private Texture noise;
     
     private Material treeMaterial;
     private Material wireMaterial;
@@ -90,6 +92,9 @@ public class ForestGridState extends BaseAppState {
 
     private boolean showTestPattern = false;
     private boolean showTrunkBumps = true;
+    private boolean useWind = false;
+
+    private Vector4f windCurve = new Vector4f();
 
     public ForestGridState() {
     }
@@ -148,6 +153,21 @@ public class ForestGridState extends BaseAppState {
         return showTrunkBumps;
     }
     
+    public void setUseWind( boolean b ) {
+        if( this.useWind == b ) {
+            return;
+        }
+        this.useWind = b;
+        treeMaterial.setBoolean("UseWind", useWind);
+        leafMaterial.setBoolean("UseWind", useWind);
+        flatMaterial.setBoolean("UseWind", useWind);
+        impostorMaterial.setBoolean("UseWind", useWind);
+    }
+    
+    public boolean getUseWind() {
+        return useWind;
+    }
+    
     @Override
     protected void initialize( Application app ) {
  
@@ -164,7 +184,10 @@ public class ForestGridState extends BaseAppState {
         testPattern.setWrap(Texture.WrapMode.Repeat);            
 
         leafAtlas = assets.loadTexture("Textures/leaf-atlas.png");
-        leafAtlas.setWrap(Texture.WrapMode.Repeat);                        
+        leafAtlas.setWrap(Texture.WrapMode.Repeat);
+        
+        noise = assets.loadTexture("Textures/noise-x3-512.png");                        
+        noise.setWrap(Texture.WrapMode.Repeat);
  
         treeParameters = getState(TreeParametersState.class).getTreeParametersRef();
         
@@ -185,7 +208,8 @@ public class ForestGridState extends BaseAppState {
         options.addOptionToggle("Test Pattern", this, "setShowTestPattern");
         Checkbox cb = options.addOptionToggle("Bump-map", this, "setShowTrunkBumps");
         cb.setChecked(true);
-                
+ 
+        options.addOptionToggle("Wind", this, "setUseWind");               
         
         PropertyPanel properties = new PropertyPanel("glass");
         gridParameters = properties.createReference();
@@ -220,8 +244,14 @@ public class ForestGridState extends BaseAppState {
     }
 
     private float nextUpdateCheck = 0.1f;
+    private float time;
     @Override
     public void update( float tpf ) {
+
+
+        // Calculate the wind curves
+        time += tpf;
+        windCurve.x = time;         
     
         nextUpdateCheck += tpf;
         if( nextUpdateCheck <= 0.1f ) {
@@ -268,9 +298,12 @@ public class ForestGridState extends BaseAppState {
         }
            
         treeMaterial = GuiGlobals.getInstance().createMaterial(ColorRGBA.Yellow, true).getMaterial();
+        treeMaterial = new Material(getApplication().getAssetManager(), "MatDefs/TreeLighting.j3md");
         treeMaterial.setColor("Diffuse", ColorRGBA.White);
         treeMaterial.setColor("Ambient", ColorRGBA.White);
         treeMaterial.setBoolean("UseMaterialColors", true);
+        treeMaterial.setBoolean("UseWind", false);
+        treeMaterial.setTexture("WindNoise", noise);
         treeMaterial.setTexture("DiffuseMap", bark);            
         treeMaterial.setTexture("NormalMap", barkNormals);
         treeMaterial.setTexture("ParallaxMap", barkBumps);                    
@@ -288,6 +321,8 @@ public class ForestGridState extends BaseAppState {
         flatMaterial.setColor("Ambient", ColorRGBA.White);
         flatMaterial.setBoolean("UseMaterialColors", true);
         flatMaterial.setTexture("DiffuseMap", bark);            
+        flatMaterial.setBoolean("UseWind", false);
+        flatMaterial.setTexture("WindNoise", noise);
         flatMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         return flatMaterial;
     }
@@ -302,12 +337,10 @@ public class ForestGridState extends BaseAppState {
         impostorMaterial.setColor("Ambient", ColorRGBA.White);
         impostorMaterial.setBoolean("UseMaterialColors", true);
         impostorMaterial.setFloat("AlphaDiscardThreshold", 0.5f);
+
+        impostorMaterial.setBoolean("UseWind", false);
+        impostorMaterial.setTexture("WindNoise", noise);
         
-        AssetManager assets = getApplication().getAssetManager();
-        Texture testTexture = assets.loadTexture("Textures/test-tree-atlas2.png");
-        //testTexture.setWrap(Texture.WrapMode.Repeat);
-        
-        impostorMaterial.setTexture("DiffuseMap", testTexture);            
         impostorMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         impostorMaterial.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
         return impostorMaterial;
@@ -334,6 +367,9 @@ public class ForestGridState extends BaseAppState {
         leafMaterial.setColor("Ambient", ColorRGBA.White);
         leafMaterial.setBoolean("UseMaterialColors", true);
         leafMaterial.setTexture("DiffuseMap", leafAtlas);         
+
+        leafMaterial.setBoolean("UseWind", false);
+        leafMaterial.setTexture("WindNoise", noise);
             
         leafMaterial.setFloat("AlphaDiscardThreshold", 0.5f);         
         leafMaterial.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);

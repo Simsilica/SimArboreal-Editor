@@ -41,13 +41,14 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.ScreenshotAppState;
+import com.jme3.app.state.VideoRecorderAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.BaseStyles;
-import com.simsilica.lemur.style.StyleLoader;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
@@ -104,6 +105,16 @@ public class TreeEditor extends SimpleApplication {
               new PostProcessorState(), 
               new ScreenshotAppState("", System.currentTimeMillis())); 
     }
+
+    public void toggleRecordVideo() {
+        VideoRecorderAppState recorder = stateManager.getState(VideoRecorderAppState.class);
+        if( recorder == null ) {
+            recorder = new VideoRecorderAppState(new File("trees-" + System.currentTimeMillis() + ".avi"));
+            stateManager.attach(recorder);
+        } else {
+            stateManager.detach(recorder);
+        }
+    }
  
     @Override
     public void simpleInitApp() {
@@ -116,6 +127,8 @@ public class TreeEditor extends SimpleApplication {
         MainFunctions.initializeDefaultMappings(inputMapper);
         inputMapper.activateGroup( MainFunctions.GROUP );        
         MovementFunctions.initializeDefaultMappings(inputMapper);
+
+        inputMapper.addDelegate(MainFunctions.F_RECORD_VIDEO, this, "toggleRecordVideo");
 
         /*
         // Now create the normal simple test scene    
@@ -133,8 +146,6 @@ public class TreeEditor extends SimpleApplication {
 
         BaseStyles.loadGlassStyle();
 
-        //new StyleLoader(GuiGlobals.getInstance().getStyles()).loadStyleResource(GLASS_STYLES);
- 
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
         treeOptions.addOptionToggle("Grass", stateManager.getState(GroundState.class), "setShowGrass");                
         treeOptions.addOptionToggle("Sky", stateManager.getState(SkyState.class), "setShowSky");               
