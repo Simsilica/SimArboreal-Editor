@@ -137,10 +137,14 @@ public class FileActionsState extends BaseAppState {
     }
  
     private Map<String, File> lastRoots = new HashMap<String, File>();
-    protected File chooseFile( String extension, final String description, final boolean save ) {
-        final String ext = (!extension.startsWith(".") ? "." : "") + extension.toLowerCase();
+    protected File chooseFile( final String description, final boolean save, String... extensions ) {
+        //final String ext = (!extension.startsWith(".") ? "." : "") + extension.toLowerCase();
+        final String[] exts = new String[extensions.length];
+        for( int i = 0; i < exts.length; i++ ) {
+            exts[i] = (!extensions[i].startsWith(".") ? "." : "") + extensions[i].toLowerCase(); 
+        }
  
-        File lastRoot = lastRoots.get(ext);
+        File lastRoot = lastRoots.get(exts[0]);
         if( lastRoot == null ) {
             lastRoot = new File(".");
         }
@@ -158,7 +162,16 @@ public class FileActionsState extends BaseAppState {
  
                         @Override
                         public boolean accept( File file ) {
-                            return file.isDirectory() || file.getName().toLowerCase().endsWith(ext);
+                            if( file.isDirectory() ) {
+                                return true;
+                            }
+                            String s = file.getName().toLowerCase();
+                            for( String e : exts ) {
+                                if( s.endsWith(e) ) {
+                                    return true;
+                                }
+                            }
+                            return false;
                         }
     
                         @Override
@@ -199,10 +212,10 @@ public class FileActionsState extends BaseAppState {
         }
         
         File result = openDialog.getSelectedFile();
-        lastRoots.put(ext, result.getParentFile());
+        lastRoots.put(exts[0], result.getParentFile());
          
-        if( save && !result.getName().toLowerCase().endsWith(ext) ) {
-            result = new File(result.getParent(), result.getName() + ext);
+        if( save && !result.getName().toLowerCase().endsWith(exts[0]) ) {
+            result = new File(result.getParent(), result.getName() + exts[0]);
         }
         
         return result;
@@ -279,7 +292,7 @@ public class FileActionsState extends BaseAppState {
         @Override
         public void execute( Button source ) {
             System.out.println( "Saving j3o..." ); 
-            File f = chooseFile("j3o", "JME object file", true);
+            File f = chooseFile("JME object file", true, "j3o");
             System.out.println( "File:" + f );
             if( f == null ) {
                 return;
@@ -307,7 +320,7 @@ public class FileActionsState extends BaseAppState {
         @Override
         public void execute( Button source ) {
             System.out.println( "Saving stparms.json..." ); 
-            File f = chooseFile("simap.json", "Tree Parameters File", true);
+            File f = chooseFile("Tree Parameters File", true, "simap");
             System.out.println( "File:" + f );
             if( f == null ) {
                 return;
@@ -336,7 +349,7 @@ public class FileActionsState extends BaseAppState {
         @Override
         public void execute( Button source ) {
             System.out.println( "Loading stparms.json..." ); 
-            File f = chooseFile("simap.json", "Tree Parameters File", false);
+            File f = chooseFile("Tree Parameters File", false, "simap", "simap.json");
             System.out.println( "File:" + f );
             if( f == null ) {
                 return;
@@ -356,7 +369,7 @@ public class FileActionsState extends BaseAppState {
         @Override
         public void execute( Button source ) {
         
-            File f = chooseFile("png", "Tree Atlas Images", true);
+            File f = chooseFile("Tree Atlas Images", true, "png");
             if( f == null ) {
                 return;
             }

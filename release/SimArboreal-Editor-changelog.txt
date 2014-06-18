@@ -8,6 +8,9 @@ Revision ???
 - Added toggleable noise-based wind
 - Added a video recodring option F12
 - Added editors for the tree wind-related parameters
+- Changed the tree parameters file extension to just plain
+    .simap  The old simap.json extension is still supported for
+    loading and the file format itself hasn't changed. 
     
 
 Revision 126
