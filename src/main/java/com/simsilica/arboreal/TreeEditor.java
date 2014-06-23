@@ -151,6 +151,7 @@ public class TreeEditor extends SimpleApplication {
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
         treeOptions.addOptionToggle("Grass", stateManager.getState(GroundState.class), "setShowGrass");                
         treeOptions.addOptionToggle("Ground Atm.", stateManager.getState(GroundState.class), "setUseScattering");                
+        treeOptions.addOptionToggle("Tree Atm.", stateManager.getState(ForestGridState.class), "setUseScattering");                
         treeOptions.addOptionToggle("Sky", stateManager.getState(SkyState.class), "setEnabled");
         stateManager.getState(SkyState.class).setEnabled(false);
     }    

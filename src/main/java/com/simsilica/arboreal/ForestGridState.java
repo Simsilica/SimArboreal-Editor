@@ -47,6 +47,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector4f;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
+import com.simsilica.fx.sky.SkyState;
 import com.simsilica.lemur.Checkbox;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -93,6 +94,7 @@ public class ForestGridState extends BaseAppState {
     private boolean showTestPattern = false;
     private boolean showTrunkBumps = true;
     private boolean useWind = false;
+    private boolean useScattering = false;
 
     private Vector4f windCurve = new Vector4f();
 
@@ -166,6 +168,19 @@ public class ForestGridState extends BaseAppState {
     
     public boolean getUseWind() {
         return useWind;
+    }
+    
+    public void setUseScattering( boolean b ) {
+        if( this.useScattering == b ) {
+            return;
+        }
+        this.useScattering = b;
+        if( treeMaterial != null ) {
+            treeMaterial.setBoolean("UseScattering", useScattering);
+            leafMaterial.setBoolean("UseScattering", useScattering);
+            flatMaterial.setBoolean("UseScattering", useScattering);
+            impostorMaterial.setBoolean("UseScattering", useScattering);
+        }
     }
     
     @Override
@@ -332,6 +347,10 @@ public class ForestGridState extends BaseAppState {
         treeMaterial.setTexture("NormalMap", barkNormals);
         treeMaterial.setTexture("ParallaxMap", barkBumps);                    
         //treeMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        
+        // Hook it up to the atmospherics
+        getState(SkyState.class).getAtmosphericParameters().applyGroundParameters(treeMaterial, true);
+        
         return treeMaterial;
     }
  
@@ -348,6 +367,10 @@ public class ForestGridState extends BaseAppState {
         flatMaterial.setBoolean("UseWind", false);
         flatMaterial.setTexture("WindNoise", noise);
         flatMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        
+        // Hook it up to the atmospherics
+        getState(SkyState.class).getAtmosphericParameters().applyGroundParameters(flatMaterial, true);
+        
         return flatMaterial;
     }
 
@@ -367,6 +390,10 @@ public class ForestGridState extends BaseAppState {
         
         impostorMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         impostorMaterial.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        
+        // Hook it up to the atmospherics
+        getState(SkyState.class).getAtmosphericParameters().applyGroundParameters(impostorMaterial, true);
+        
         return impostorMaterial;
     }
     
@@ -397,6 +424,9 @@ public class ForestGridState extends BaseAppState {
             
         leafMaterial.setFloat("AlphaDiscardThreshold", 0.5f);         
         leafMaterial.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+
+        // Hook it up to the atmospherics
+        getState(SkyState.class).getAtmosphericParameters().applyGroundParameters(leafMaterial, true);
         
         return leafMaterial;
     }
