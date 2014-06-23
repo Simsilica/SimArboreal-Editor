@@ -4,6 +4,7 @@ Revision ???
     its LightingState and SkyState (with scattering)
 - Grass plane supports atmospherics and a toggle was added to
     the visualization options panel.
+- Added atmospheric support for trees along with a toggle.
 
 
 
