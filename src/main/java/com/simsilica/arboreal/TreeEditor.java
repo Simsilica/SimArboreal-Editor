@@ -44,6 +44,8 @@ import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.app.state.VideoRecorderAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
+import com.simsilica.fx.LightingState;
+import com.simsilica.fx.sky.SkyState;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.BaseStyles;
@@ -148,6 +150,8 @@ public class TreeEditor extends SimpleApplication {
 
         TreeOptionsState treeOptions = stateManager.getState(TreeOptionsState.class);                
         treeOptions.addOptionToggle("Grass", stateManager.getState(GroundState.class), "setShowGrass");                
-        treeOptions.addOptionToggle("Sky", stateManager.getState(SkyState.class), "setShowSky");               
+        treeOptions.addOptionToggle("Ground Atm.", stateManager.getState(GroundState.class), "setUseScattering");                
+        treeOptions.addOptionToggle("Sky", stateManager.getState(SkyState.class), "setEnabled");
+        stateManager.getState(SkyState.class).setEnabled(false);
     }    
 }

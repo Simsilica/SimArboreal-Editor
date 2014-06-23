@@ -54,7 +54,7 @@ import com.simsilica.lemur.event.BaseAppState;
  *
  *  @author    Paul Speed
  */
-public class SkyState extends BaseAppState {
+public class LegacySkyState extends BaseAppState {
 
     private ColorRGBA skyColor;
     private ColorRGBA sunColor;
@@ -64,7 +64,7 @@ public class SkyState extends BaseAppState {
     
     private VersionedReference<Vector3f> lightDir;
 
-    public SkyState() {
+    public LegacySkyState() {
         this.sunColor = new ColorRGBA(1, 1, 0.9f, 1);
         this.skyColor = new ColorRGBA(0.5f, 0.5f, 1f, 1);
     }
@@ -92,7 +92,7 @@ public class SkyState extends BaseAppState {
     @Override
     protected void initialize( Application app ) {
     
-        lightDir = getState(LightingState.class).getLightDirRef();
+        lightDir = getState(LegacyLightingState.class).getLightDirRef();
     
  
         // Add a sun sphere

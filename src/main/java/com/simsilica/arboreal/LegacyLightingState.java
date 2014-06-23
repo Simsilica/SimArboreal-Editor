@@ -54,7 +54,7 @@ import com.simsilica.lemur.event.BaseAppState;
  *
  *  @author    Paul Speed
  */
-public class LightingState extends BaseAppState {
+public class LegacyLightingState extends BaseAppState {
 
     private VersionedHolder<Vector3f> lightDir = new VersionedHolder<Vector3f>();
     
@@ -67,7 +67,7 @@ public class LightingState extends BaseAppState {
     
     private Node rootNode;  // the one we added the lights to
     
-    public LightingState() {
+    public LegacyLightingState() {
         lightDir.setObject(new Vector3f(-0.2f, -1, -0.3f).normalizeLocal());
         this.sunColor = ColorRGBA.White.mult(2);
         this.ambientColor = new ColorRGBA(0.25f, 0.25f, 0.25f, 1);

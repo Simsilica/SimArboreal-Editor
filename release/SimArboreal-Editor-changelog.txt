@@ -1,3 +1,12 @@
+Revision ???
+-------------
+- Added a dependency to the SimFX package and converted to use
+    its LightingState and SkyState (with scattering)
+- Grass plane supports atmospherics and a toggle was added to
+    the visualization options panel.
+
+
+
 Revision 143
 -------------
 - Added an action to save the tree atlas images

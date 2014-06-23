@@ -2,11 +2,15 @@
 //#define HQ_ATTENUATION
 
 #import "Common/ShaderLib/Skinning.glsllib"
+#import "MatDefs/VertScattering.glsllib"
+
 
 uniform mat4 g_WorldViewProjectionMatrix;
 uniform mat4 g_WorldViewMatrix;
+uniform mat4 g_WorldMatrix;
 uniform mat3 g_NormalMatrix;
 uniform mat4 g_ViewMatrix;
+uniform vec3 g_CameraPosition;
 
 uniform vec4 m_Ambient;
 uniform vec4 m_Diffuse;
@@ -149,11 +153,16 @@ void main(){
         Skinning_Compute(modelSpacePos, modelSpaceNorm);
         #endif
    #endif
+   
+   #ifdef USE_SCATTERING
+      vec4 wPos = g_WorldMatrix * modelSpacePos;
+      calculateVertexGroundScattering(wPos.xyz, g_CameraPosition);
+   #endif
 
    gl_Position = g_WorldViewProjectionMatrix * modelSpacePos;
    texCoord = inTexCoord;
    #ifdef SEPARATE_TEXCOORD
-      texCoord2 = inTexCoord2;
+      texCoord2 = inTexCoord2; 
    #endif
 
    vec3 wvPosition = (g_WorldViewMatrix * modelSpacePos).xyz;

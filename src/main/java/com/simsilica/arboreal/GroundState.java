@@ -47,6 +47,7 @@ import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.TangentBinormalGenerator;
+import com.simsilica.fx.sky.SkyState;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.event.BaseAppState;
 import com.simsilica.lemur.geom.MBox;
@@ -63,8 +64,21 @@ public class GroundState extends BaseAppState {
     private Geometry ground;
 
     private boolean showGrass = false;
+    private boolean useScattering = false;
 
     public GroundState() {
+    }
+
+    public void setUseScattering( boolean b ) {
+        if( this.useScattering == b ) {
+            return;
+        }
+        this.useScattering = b;
+        resetScattering();        
+    }
+    
+    public boolean getUseScattering() {
+        return useScattering;
     }
 
     public void setShowGrass( boolean b ) {
@@ -86,6 +100,13 @@ public class GroundState extends BaseAppState {
             ground.setMaterial(greenMaterial);
         }
     }
+
+    protected void resetScattering() {
+        if( groundMaterial != null ) {
+            groundMaterial.setBoolean("UseScattering", useScattering);
+        }
+    }
+    
 
     @Override
     protected void initialize( Application app ) {
@@ -112,6 +133,9 @@ public class GroundState extends BaseAppState {
         groundMaterial.setColor("Ambient", ColorRGBA.White);
         groundMaterial.setFloat("Shininess", 0);
         groundMaterial.setBoolean("UseMaterialColors", true);
+
+        // Hook up the scattering parameters
+        getState(SkyState.class).getAtmosphericParameters().applyGroundParameters(groundMaterial, true);
 
         Texture texture;
  

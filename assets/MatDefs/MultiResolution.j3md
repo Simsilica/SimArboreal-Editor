@@ -137,6 +137,21 @@ MaterialDef Phong Lighting {
         // For hardware skinning
         Int NumberOfBones
         Matrix4Array BoneMatrices
+        
+        
+        // Ground scattering parameters
+        Boolean UseScattering       
+        Vector3 SunPosition
+        Float Exposure        
+        Float KmESun
+        Float InnerRadius        
+        Float RadiusScale
+        Float PlanetScale : 1        
+        Vector3 InvWavelengthsKrESun        
+        Float AverageDensityScale
+        Float InvAverageDensityHeight;
+        Vector3 KWavelengths4PI;        
+        
     }
 
     Technique {
@@ -182,6 +197,8 @@ MaterialDef Phong Lighting {
             SPHERE_MAP : SphereMap  
 
             NUM_BONES : NumberOfBones
+            
+            USE_SCATTERING : UseScattering
         }
     }
 
