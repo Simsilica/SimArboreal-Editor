@@ -154,5 +154,6 @@ public class TreeEditor extends SimpleApplication {
         treeOptions.addOptionToggle("Tree Atm.", stateManager.getState(ForestGridState.class), "setUseScattering");                
         treeOptions.addOptionToggle("Sky", stateManager.getState(SkyState.class), "setEnabled");
         stateManager.getState(SkyState.class).setEnabled(false);
+                
     }    
 }
