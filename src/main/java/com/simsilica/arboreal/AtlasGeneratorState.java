@@ -563,13 +563,13 @@ public class AtlasGeneratorState extends BaseAppState {
         }
 
         @Override
-        public void apply() {
+        public void apply( Builder builder ) {
             // Set the new trunk
             updateTree(trunkMesh, leafMesh);               
         }
 
         @Override
-        public void release() {
+        public void release( Builder builder ) {
             
         }        
     }

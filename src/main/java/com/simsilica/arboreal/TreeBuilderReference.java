@@ -55,6 +55,7 @@ import com.simsilica.arboreal.mesh.FlatPolyTreeMeshGenerator;
 import com.simsilica.arboreal.mesh.LodSwitchControl;
 import com.simsilica.arboreal.mesh.SkinnedTreeMeshGenerator;
 import com.simsilica.arboreal.mesh.Vertex;
+import com.simsilica.builder.Builder;
 import com.simsilica.builder.BuilderReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -222,7 +223,7 @@ public class TreeBuilderReference implements BuilderReference
     }
     
     @Override
-    public void apply() {
+    public void apply( Builder builder ) {
         if( newLods == null ) {
             // Nothing was built
             return;
@@ -261,7 +262,7 @@ public class TreeBuilderReference implements BuilderReference
     }
     
     @Override
-    public void release() {
+    public void release( Builder builder ) {
         for( LevelGeometry g : lods ) {
             if( g != null ) {
                 g.release();
