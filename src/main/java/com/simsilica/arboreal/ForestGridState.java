@@ -287,7 +287,7 @@ public class ForestGridState extends BaseAppState {
             refreshWindParms();
         }
         
-        if( building.getObject() && getState(BuilderState.class).getBuilder().getPending() == 0 ) {
+        if( building.getObject() && getState(BuilderState.class).getBuilder().getPendingCount() == 0 ) {
             building.setObject(false);
             refreshStats();
         }
