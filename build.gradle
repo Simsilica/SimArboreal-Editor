@@ -54,38 +54,7 @@ dependencies {
     compile 'org.meta-jb:meta-jb-json:1.0.1'
 
     compile 'org.slf4j:slf4j-api:1.7.13'
-    
-/*
-    compile 'com.google.guava:guava:19.0'
-    
-    compile "com.jme3:jme3-core:unknown" 
-    //compile "org.jmonkeyengine:jme3-core:3.1.+" 
-    compile "org.jmonkeyengine:jme3-desktop:3.1.+" 
-    compile "org.jmonkeyengine:jme3-lwjgl:3.1.+" 
-    compile "org.jmonkeyengine:jme3-networking:3.1.+" 
-    
-    compile "com.simsilica:lemur:1.6.+"
-    compile "com.simsilica:lemur-proto:1.5.+"
-
-    compile "com.simsilica:zay-es:1.2.+"
-    compile "com.simsilica:zay-es-net:1.2.+"
-
-    compile "com.simsilica:sio2:1.0.+"
-    compile "com.simsilica:sim-math:1.0.+"
-
-    compile "com.simsilica:sim-dialog:1.0.+"
-    compile "com.simsilica:sim-objects:1.0.+"
- 
-    //compile 'org.codehaus.groovy:groovy:2.4.5'
-    //runtime 'org.codehaus.groovy:groovy-all:2.4.5'
-    
-    compile 'org.slf4j:slf4j-api:1.7.13'
-    //runtime 'org.apache.logging.log4j:log4j-api:2.5'
-    //runtime 'org.apache.logging.log4j:log4j-core:2.5'
-    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
-    
-    compile 'org.meta-jb:meta-jb-util:0.25.1'
-*/    
+        
     runtime files("assets")        
 }
 
