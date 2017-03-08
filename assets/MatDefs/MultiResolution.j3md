@@ -331,10 +331,6 @@ MaterialDef Phong Lighting {
         }
     }
 
-    Technique {
-        LightMode FixedPipeline
-    }
-
     Technique Glow {
 
         VertexShader GLSL110:   Common/MatDefs/Misc/Unshaded.vert
